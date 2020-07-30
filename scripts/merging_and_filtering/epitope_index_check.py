@@ -1,3 +1,11 @@
+#!usr/bin/env python3
+"""
+epitope_index_check.py
+
+For issues contact Ben Weeder (weeder@ohsu.edu)
+
+"""
+
 from sequence_featurization_tools import *
 import re
 import pandas as pd
@@ -6,9 +14,9 @@ from optparse import OptionParser
 # define command line parameters
 parser = OptionParser()
 parser.add_option("-i", "--in_file", dest="in_file",
-                  help="pandas data frame of fully merged pepsickle info")
-parser.add_option("-o", "--out_dict", dest="out_dict",
-                  help="output directory where vetted CSV is exported")
+                  help="pandas data frame of fully merged fragment info")
+parser.add_option("-o", "--out_file", dest="out_file",
+                  help="output file where vetted CSV is written")
 
 (options, args) = parser.parse_args()
 
@@ -113,4 +121,4 @@ df = df.reset_index(drop=True)
 
 print("Total entries left: ", len(df))
 
-df.to_csv(options.out_dict, index=False)
+df.to_csv(options.out_file, index=False)

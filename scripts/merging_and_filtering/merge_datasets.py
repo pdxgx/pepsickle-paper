@@ -1,4 +1,4 @@
-#! usr/bin/env python3
+#!usr/bin/env python3
 """
 merge_datasets.py
 
@@ -32,7 +32,7 @@ parser.add_option("--human_only", dest="human_only", action="store_true",
 # import each database
 SYF_df = pd.read_csv(options.in_dir + "/SYFPEITHI_epitopes_w_source.csv")
 IEDB_df = pd.read_csv(options.in_dir + "/unique_iedb_epitopes.csv")
-bc_df = pd.read_csv(options.in_dir + "/breast_cancer_data_w_sequences.csv")
+bc_df = pd.read_csv(options.in_dir + "/breast_cancer_epitopes_w_sequences.csv")
 antijen_df = pd.read_csv(options.in_dir + "/AntiJen_Tcell_w_sequences.csv")
 digestion_df = pd.read_csv(options.in_dir + "/compiled_digestion_df.csv")
 winter_df = pd.read_csv(options.in_dir + "/winter_et_al_cleavage_fragments.csv")

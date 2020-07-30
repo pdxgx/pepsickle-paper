@@ -4,7 +4,6 @@ negative_set_generation.py
 
 Mary Wood (mary.a.wood.91@gmail.com)
 
-
 '''
 
 from __future__ import print_function
@@ -23,6 +22,7 @@ import sequence_featurization_tools as sf
 
 # Set wildcard amino acid info
 wildcard_aas = ['B', 'J', 'X', 'Z']
+
 
 def generate_regex(peptide):
 	''' Generates a regex pattern to search ambiguous amino acids
@@ -122,6 +122,7 @@ def remove_positives(temp_negatives, positives, positive_regex, negatives, row,
 	else:
 		# Store all negatives
 		return list(true_negatives)
+
 
 if __name__ == '__main__':
 

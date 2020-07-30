@@ -9,7 +9,7 @@ an updated CSV that includes source protein sequences. Column names are also
 updated for consistency with other databases and easier downstream merging
 
 options:
--i, --in_file: CSV of AntiJen results from database
+-i, --in_file: CSV of breast cancer epitopes from XXX et al.
 -o, --out_dir: location to export updated CSV
 """
 from extraction_functions import *
@@ -20,7 +20,7 @@ from optparse import OptionParser
 # define command line parameters
 parser = OptionParser()
 parser.add_option("-i", "--in_file", dest="in_file",
-                  help="CSV of AntiJen database results")
+                  help="CSV of BC epitopes")
 parser.add_option("-o", "--out_dir", dest="out_dir",
                   help="output directory where CSV is exported")
 
@@ -85,5 +85,5 @@ bc_df['start_pos'] = np.nan
 bc_df['end_pos'] = np.nan
 
 # export data
-bc_df.to_csv(options.out_dir + "/breast_cancer_data_w_sequences.csv",
+bc_df.to_csv(options.out_dir + "/breast_cancer_epitopes_w_sequences.csv",
              index=False)

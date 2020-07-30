@@ -103,10 +103,10 @@ for ind in range(len(results_pd)):
             # if sequences match, pass
             pass
         else:
-            # if sequences do not match, tally and pring mismatch
+            # if sequences do not match, tally and print mismatch
             mismatch += 1
-            print("Expected fragment sequence: ", est_seq)
-            print("Listed fragment sequence: ", true_seq)
+            # print("Expected fragment sequence: ", est_seq)
+            # print("Listed fragment sequence: ", true_seq)
 
 # print quality check
 print("Entries with missing position info: ", no_pos)

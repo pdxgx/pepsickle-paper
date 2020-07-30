@@ -184,10 +184,10 @@ def extract_SYF_table(query):
     handle = urllib.request.urlopen(query)
     buffer = BeautifulSoup(str(handle.read()), 'html.parser')
     tables = buffer.find_all("table")
-    if len(tables) < 2:
+    if len(tables) < 3:
         raise EmptyQueryError(len(tables), "is too few. Missing content table")
 
-    epitope_table = tables[1]
+    epitope_table = tables[2]
     out_df = pd.DataFrame(columns=['epitope', 'prot_name', 'ebi_id',
                                    'reference'])
     start_flag = False
@@ -464,3 +464,38 @@ def parse_digestion_file(file):
             meta_dict['Organism'] = "mammal_other"
     out_df = generate_cleavage_df(meta_dict, seq_dict)
     return out_df
+
+
+def parse_cleavage_logo(row):
+    source = row[0]
+    logo = row[1]
+    start_pos = 0
+    end_pos = None
+    entries = []
+    excluded_positions = ""
+    for pos in range(len(logo)):
+        if logo[pos] == "?":
+            if len(excluded_positions) == 0:
+                excluded_positions += str(pos)
+            else:
+                excluded_positions += (";" + str(pos))
+
+    for pos in range(len(logo)):
+        if logo[pos] == "C":
+            end_pos = pos + 1
+            entry = [source[start_pos:end_pos], start_pos, end_pos, source,
+                     excluded_positions, "C"]
+            entries.append(entry)
+        if logo[pos] == "M":
+            end_pos = pos + 1
+            entry = [source[start_pos:end_pos], start_pos, end_pos, source,
+                     excluded_positions, "M"]
+            entries.append(entry)
+        if logo[pos] == "I":
+            end_pos = pos + 1
+            entry = [source[start_pos:end_pos], start_pos, end_pos, source,
+                     excluded_positions, "I"]
+            entries.append(entry)
+        else:
+            pass
+    return entries

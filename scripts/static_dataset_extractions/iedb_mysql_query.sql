@@ -1,9 +1,9 @@
-#! usr/bin/env mysql
+#!usr/bin/env mysql
 
 # create and build db
 CREATE DATABASE iedb_public;
 USE iedb_public;
-SOURCE /Users/weeder/PycharmProjects/proteasome/data/raw_data/iedb_public.sql;
+SOURCE ./data/raw/database_pulls/iedb_public.sql;
 
 # index for faster merge downstream
 CREATE INDEX t_ind ON mhc_elution(as_type_id);
