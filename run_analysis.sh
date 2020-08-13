@@ -37,6 +37,10 @@ export MYSQL_PWD=[PASSWORD]
 # python3 ./scripts/dataset_processing/get_breast_cancer_source_sequences.py -i ./data/processed/breast_cancer_epitopes.csv -o ./data/processed/
 # winter et al
 # python3 ./scripts/dataset_processing/prep_winter_data.py -i ./data/raw/Winter_et_al_results.csv -o ./data/processed/
+# levy et al
+# python3 ./scripts/dataset_processing/prep_levy_data.py -i ./data/raw/Levy_et_al_degradome.csv -a ./data/raw/gene_protein_id_map.csv -o ./data/processed/levy_fragments_ambiguous.csv
+# python3 ./scripts/merging_and_filtering/epitope_index_check.py -i ./data/processed/levy_fragments_ambiguous.csv -o ./data/processed/levy_fragments_ambiguous_mapped.csv
+# python3 ./scripts/dataset_processing/levy_post_processing.py -i ./data/processed/levy_fragments_ambiguous_mapped.csv -o ./data/processed/levy_fragments_unique_mapped.csv
 
 ## Merge datasets together
 # python3 ./scripts/merging_and_filtering/merge_datasets.py -i ./data/processed -o ./data/merged
