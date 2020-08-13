@@ -47,7 +47,7 @@ for file in file_list:
 digestion_df['entry_source'] = "cleavage_map"
 
 # for now drop all non-20S and all missing pepsickle type
-digestion_df = digestion_df[digestion_df['Subunit'] == "20S"]
+# digestion_df = digestion_df[digestion_df['Subunit'] == "20S"]
 
 un_annotated = digestion_df[digestion_df['Proteasome'] == "?"]
 print("Un-annotated entries: ", len(un_annotated['DOI'].unique()))
