@@ -24,7 +24,7 @@ parser.add_option("-i", "--in_dir", dest="in_dir",
                        "information")
 parser.add_option("-o", "--out_dir", dest="out_dir",
                   help="output directory/name for merged CSV")
-parser.add_option("--human_only", dest="human_only", action="store_true",
+parser.add_option("--human-only", dest="human_only", action="store_true",
                   default=False,
                   help="restricts to only human epitope exmaples")
 (options, args) = parser.parse_args()
