@@ -36,6 +36,7 @@ bc_df = pd.read_csv(options.in_dir + "/breast_cancer_epitopes_w_sequences.csv")
 antijen_df = pd.read_csv(options.in_dir + "/AntiJen_Tcell_w_sequences.csv")
 digestion_df = pd.read_csv(options.in_dir + "/compiled_digestion_df.csv")
 winter_df = pd.read_csv(options.in_dir + "/winter_et_al_cleavage_fragments.csv")
+levy_df = pd.read_csv(options.in_dir + "/levy_fragments_unique_mapped.csv")
 
 # identify names for IEDB to match others...
 IEDB_df['entry_source'] = "IEDB"
@@ -115,6 +116,18 @@ new_digestion_cols = ['lit_reference', 'protein_name', 'origin_species',
                       'entry_source', 'exclusions', 'fragment',
                       'full_sequence', 'start_pos']
 digestion_df.columns = new_digestion_cols
+
+new_levy_cols = ['fragment', 'protein_name', 'intensity', 'Proteasome',
+                 'Subunit', 'full_sequence', 'frag_tracker', 'entry_source',
+                 'start_pos', 'end_pos', 'origin_species', 'lit_reference']
+
+levy_df.columns = new_levy_cols
+levy_df['full_seq_accession'] = None
+levy_df['exclusions'] = None
+levy_df.drop(columns=['intensity', 'frag_tracker'], inplace=True)
+
+digestion_df = digestion_df.append(levy_df, sort=True)
+
 digestion_df['epitope_id'] = None
 digestion_df['full_seq_database'] = "UniProt"
 digestion_df['mhc_allele_name'] = None
