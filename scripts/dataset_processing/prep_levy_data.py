@@ -4,15 +4,16 @@
 """
 
 import pandas as pd
+import re
 from extraction_functions import *
 from optparse import OptionParser
 
 
 # define command line parameters
 parser = OptionParser()
-parser.add_option("-i", "--in_file", dest="in_file",
+parser.add_option("-i", "--in-file",
                   help="CSV of data from levy et al.")
-parser.add_option("-o", "--out_dir", dest="out_dir",
+parser.add_option("-o", "--out",
                   help="output directory where processed CSV is exported")
 parser.add_option("-a", "--annotation_file", dest="annotation_file",
                   help="CSV of ")
@@ -20,42 +21,48 @@ parser.add_option("-a", "--annotation_file", dest="annotation_file",
 (options, args) = parser.parse_args()
 
 # load in data
+
 dat = pd.read_csv(options.in_file, low_memory=False, header=2, skiprows=[3],
                   usecols=range(0, 4))
 
 annot = pd.read_csv(options.annotation_file, low_memory=False)
 
 # fix column names
-dat.columns = ['sequence', 'gene_names', 'logF_med_intensity_UT',
+dat.columns = ['fragment', 'gene_names', 'logF_med_intensity_UT',
                'logF_med_intensity_T']
 
 # remove decoy peptides
 dat = dat[(dat['logF_med_intensity_T'].notna()) |
           (dat['logF_med_intensity_UT'].notna())]
 
-out_df = pd.DataFrame(columns=['sequence', 'gene_names', 'intensity',
-                               'Proteasome'])
+levy_df = pd.DataFrame(columns=['fragment', 'gene_names', 'intensity',
+                                'Proteasome'])
 
 for row in dat.iterrows():
     if row[1]['logF_med_intensity_UT'] > 0:
-        new_row = pd.Series([row[1]['sequence'], row[1]['gene_names'],
+        new_row = pd.Series([row[1]['fragment'], row[1]['gene_names'],
                              row[1]['logF_med_intensity_UT'], 'C'],
-                            index=out_df.columns)
-        out_df = out_df.append(new_row, ignore_index=True)
+                            index=levy_df.columns)
+        levy_df = levy_df.append(new_row, ignore_index=True)
     if row[1]['logF_med_intensity_T'] > 0:
-        new_row = pd.Series([row[1]['sequence'], row[1]['gene_names'],
+        new_row = pd.Series([row[1]['fragment'], row[1]['gene_names'],
                              row[1]['logF_med_intensity_T'], 'I'],
-                            index=out_df.columns)
-        out_df = out_df.append(new_row, ignore_index=True)
+                            index=levy_df.columns)
+        levy_df = levy_df.append(new_row, ignore_index=True)
 
 
-out_df['Subunit'] = "26S"
-out_df['full_sequence'] = None
+levy_df['Subunit'] = "26S"
+levy_df['full_sequence'] = None
 
-# TODO: need to split gene lines with more than one entry... look up, and then determine if these are identical or not
 # get unique protein ID's
 annot['gene_upper'] = [x.upper() for x in annot['external_gene_name']]
-unique_gene_ids = list(out_df['gene_names'].dropna().unique())
+
+split_gene_ids = [x.split(";") for x in levy_df['gene_names'].dropna()]
+flattened_genes = [item for sublist in split_gene_ids for item in sublist]
+unique_gene_ids = []
+for item in flattened_genes:
+    if item not in unique_gene_ids:
+        unique_gene_ids.append(item)
 unique_protein_ids = {}
 
 for id in unique_gene_ids:
@@ -68,60 +75,58 @@ for id in unique_gene_ids:
 # set up to store queried sequences, errors, and progress
 sequence_dict = {}
 error_index = []
-progress = 0
 
 # for each unique entry
 print("Querying protein ID's")
-for entry in unique_protein_ids:
+for progress, entry in enumerate(unique_protein_ids):
     # try to query
     try:
-        sequence_dict[entry] = retrieve_UniProt_seq(entry)
+        sequence_dict[entry] = retrieve_UniProt_seq(unique_protein_ids[entry])
     # if query fails, store index
     except:
         error_index.append(progress)
-    progress += 1
     # periodically output progress
-    if progress % 10 == 0:
+    if progress % 100 == 0:
         print(round(progress/len(unique_protein_ids)*100, 3), "% completed")
 
+assert len(error_index) == 0
 
-# attempt to repair null queries
-progress = 0
-print("Attempting to repair failed queries")
-for e in error_index:
-    # pull id of failed query
-    tmp_id = unique_protein_ids[e]
-    # ignore those with no real id
-    if tmp_id != "not applicable":
-        try:
-            # re-query with broader parameters
-            query = compile_UniProt_url(tmp_id, include_experimental=True)
-            buffer = extract_UniProt_table(query)
-            new_id = buffer["Entry"][0]
-            sequence_dict[unique_protein_ids[e]] = retrieve_UniProt_seq(new_id)
-        except IndexError:
-            # if empty results table, pass
-            pass
-    progress += 1
-    # periodically output progress
-    if progress % 10 == 0:
-        print(round(progress/len(error_index)*100, 3), "% completed")
+levy_df = levy_df.dropna(subset=['gene_names'])
+out_df = pd.DataFrame(columns=levy_df.columns)
+out_df['frag_tracker'] = None
 
+for i, entry in levy_df.iterrows():
+    genes = entry['gene_names'].split(";")
+    if len(genes) == 1:
+        tmp_entry = pd.Series(entry)
+        if tmp_entry['gene_names'] in sequence_dict.keys():
+            tmp_entry['full_sequence'] = sequence_dict[tmp_entry['gene_names']]
 
-# for each entry in the results table
-for e in range(len(out_df)):
-    # pull protein ID
-    prot_id = str(out_df.at[e, 'gene_names'])
-    # if sequence was found for given ID, store full sequence
-    if prot_id in sequence_dict.keys():
-        out_df.at[e, 'full_sequence'] = sequence_dict[prot_id]
+        # append
+        tmp_entry['frag_tracker'] = i
+        out_df = out_df.append(tmp_entry, ignore_index=True)
 
-# drop rows where no sequence was retrieved
-out_df.dropna(subset=['full_sequence'], inplace=True)
+    elif len(genes) > 1:
+        tmp_df = pd.DataFrame(columns=out_df.columns)
+        for gene in genes:
+            tmp_entry = pd.Series(entry)
+            tmp_entry['gene_names'] = gene
+            if tmp_entry['gene_names'] in sequence_dict.keys():
+                tmp_entry['full_sequence'] = sequence_dict[gene]
+            tmp_df = tmp_df.append(tmp_entry, ignore_index=True)
+
+        # append
+        tmp_df['frag_tracker'] = i
+        out_df = out_df.append(tmp_df, ignore_index=True)
+
+    if i % 1000 == 0:
+        print(i, "entry completed")
+
+out_df = out_df.dropna(subset=["full_sequence"])
 
 # add columns needed in downstream processing
 out_df['entry_source'] = "Levy_data"
 out_df['start_pos'] = None
 out_df['end_pos'] = None
 
-
+out_df.to_csv(options.out, index=False)
