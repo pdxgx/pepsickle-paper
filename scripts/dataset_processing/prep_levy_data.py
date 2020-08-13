@@ -124,9 +124,12 @@ for i, entry in levy_df.iterrows():
 
 out_df = out_df.dropna(subset=["full_sequence"])
 
+# TODO: add protein id's as full_accession_id column
 # add columns needed in downstream processing
 out_df['entry_source'] = "Levy_data"
 out_df['start_pos'] = None
 out_df['end_pos'] = None
+out_df['origin_species'] = "human"
+out_df['lit_reference'] = "https://doi.org/10.1038/nbt.4279"
 
 out_df.to_csv(options.out, index=False)

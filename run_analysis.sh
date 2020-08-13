@@ -48,11 +48,19 @@ export MYSQL_PWD=[PASSWORD]
 # python3 ./scripts/merging_and_filtering/merge_datasets.py -i ./data/processed -o ./data/merged --human_only
 
 ## Verify indices of epitopes in full file
-# python3 ./scripts/merging_and_filtering/epitope_index_check.py -i ./data/merged/merged_data_all_mammal.csv -o ./data/merged/merged_data_all_mammal_clean.csv
+python3 ./scripts/merging_and_filtering/epitope_index_check.py -i ./data/merged/merged_data_all_mammal.csv -o ./data/merged/merged_data_all_mammal_clean.csv
 # if only human data is desired
-# python3 ./scripts/merging_and_filtering/epitope_index_check.py -i ./data/merged/merged_data_human_only.csv -o ./data/merged/merged_data_human_only_clean.csv
+python3 ./scripts/merging_and_filtering/epitope_index_check.py -i ./data/merged/merged_data_human_only.csv -o ./data/merged/merged_data_human_only_clean.csv
+
+## split 20S and 26S data
+# split for all mammal
+
+# if only human
 
 ## generate the negative fragment examples based on annotated positives
+## for 20S
 # python3 ./scripts/merging_and_filtering/negative_set_generation.py --full-negative-set -i ./data/merged/merged_data_all_mammal_clean.csv -o ./data/training_sets/all_mammal_windows_13aa.pickle
 # if only human data is desired
 # python3 ./scripts/merging_and_filtering/negative_set_generation.py --full-negative-set -i ./data/merged/merged_data_human_only_clean.csv -o ./data/training_sets/human_only_windows_13aa.pickle
+
+## for 26S
