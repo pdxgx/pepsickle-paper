@@ -45,17 +45,18 @@ export MYSQL_PWD=[PASSWORD]
 ## Merge datasets together
 # python3 ./scripts/merging_and_filtering/merge_datasets.py -i ./data/processed -o ./data/merged
 # NOTE run if only human data is desired
-# python3 ./scripts/merging_and_filtering/merge_datasets.py -i ./data/processed -o ./data/merged --human_only
+# python3 ./scripts/merging_and_filtering/merge_datasets.py -i ./data/processed -o ./data/merged --human-only
 
 ## Verify indices of epitopes in full file
-python3 ./scripts/merging_and_filtering/epitope_index_check.py -i ./data/merged/merged_data_all_mammal.csv -o ./data/merged/merged_data_all_mammal_clean.csv
+# python3 ./scripts/merging_and_filtering/epitope_index_check.py -i ./data/merged/merged_data_all_mammal.csv -o ./data/merged/merged_data_all_mammal_clean.csv
 # if only human data is desired
-python3 ./scripts/merging_and_filtering/epitope_index_check.py -i ./data/merged/merged_data_human_only.csv -o ./data/merged/merged_data_human_only_clean.csv
+# python3 ./scripts/merging_and_filtering/epitope_index_check.py -i ./data/merged/merged_data_human_only.csv -o ./data/merged/merged_data_human_only_clean.csv
 
 ## split 20S and 26S data
 # split for all mammal
-
+python3 ./scripts/merging_and_filtering/split_by_subunit_type.py -i ./data/merged/merged_data_all_mammal_clean.csv -o ./data/merged
 # if only human
+python3 ./scripts/merging_and_filtering/split_by_subunit_type.py -i ./data/merged/merged_data_human_only_clean.csv -o ./data/merged --human-only
 
 ## generate the negative fragment examples based on annotated positives
 ## for 20S
