@@ -8,6 +8,7 @@ This script contains trains neural networks based on both the sequence identity
 and physical property motifs of cleavage and non-cleavage examples from
 digestion map data. Exports trained model wieghts.
 """
+
 from sequence_featurization_tools import *
 import pickle
 import torch
@@ -15,6 +16,7 @@ import torch.nn as nn
 import torch.optim as optim
 from sklearn import metrics
 import torch.nn.functional as F
+from optparse import OptionParser
 
 # visualization tools
 import matplotlib.pyplot as plt
@@ -36,16 +38,25 @@ def attribute_features(model, algo, input, label, **kwargs):
     tensor_attributions = algo.attribure(input, label, **kwargs)
     return tensor_attributions
 
-# set CPU or GPU
-dtype = torch.FloatTensor
-# dtype = torch.cuda.FloatTensor # Uncomment this to run on GPU
 
+parser = OptionParser()
+parser.add_option("-i", "--in-file",
+                  help="pickled dictionary of cleavage windows")
+parser.add_option("-o", "--out",
+                  help="output directory where results will be exported")
+parser.add_option("--human-only", action="store_true",
+                  help="flags export files with human only annotation")
+parser.add_option("--GPU", action="store_true",
+                  help="trains models using available GPU")
+(options, args) = parser.parse_args()
 
-# load in data and set output directory
-# indir = "D:/Hobbies/Coding/proteasome_networks/data/"
-indir = "/Users/weeder/PycharmProjects/pepsickle/data/generated_training_sets/"
-file = "/cleavage_windows_all_mammal_13aa.pickle"
-out_dir = "/models/model_weights"
+# set CPU or GPU training
+if options.GPU:
+    dtype = torch.cuda.FloatTensor
+else:
+    dtype = torch.FloatTensor
+
+# set holdout amount and epochs
 test_holdout_p = .1
 n_epoch = 42
 
@@ -109,6 +120,7 @@ class MotifNet(nn.Module):
 
         return x
 
+
 # initialize networks
 sequence_model = SeqNet()
 motif_model = MotifNet()
@@ -119,7 +131,7 @@ if dtype is torch.cuda.FloatTensor:
     motif_model = motif_model.cuda()
 
 # load in data from pickled dictionary
-handle = open(indir + file, "rb")
+handle = open(options.in_file, "rb")
 data = pickle.load(handle)
 
 # create list of cleavage windows
@@ -381,11 +393,19 @@ motif_model.load_state_dict(motif_state)
 motif_model.eval()
 
 # save model states to file
-torch.save(seq_state, out_dir + "/all_mammal_cleavage_map_sequence_mod.pt")
-torch.save(motif_state, out_dir + "/all_mammal_cleavage_map_motif_mod.pt")
+if options.human_only:
+    torch.save(seq_state, options.out +
+               "/human_20S_digestion_sequence_mod.pt")
+    torch.save(motif_state, options.out +
+               "/human_20S_digestion_motif_mod.pt")
+else:
+    torch.save(seq_state, options.out +
+               "/all_mammal_20S_digestion_sequence_mod.pt")
+    torch.save(motif_state, options.out +
+               "/all_mammal_20S_digestion_motif_mod.pt")
 
-## identify feature improtance
 
+## identify feature importance
 # define also
 """
 saliency = Saliency(motif_model)

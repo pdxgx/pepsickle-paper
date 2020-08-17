@@ -17,21 +17,32 @@ from sklearn import metrics
 import torch.nn.functional as F
 import numpy as np
 import matplotlib.pyplot as plt
+from optparse import OptionParser
 
-# set CPU or GPU
-dtype = torch.FloatTensor
-# dtype = torch.cuda.FloatTensor # Uncomment this to run on GPU
 
-# prep data
-# indir = "D:/Hobbies/Coding/proteasome_networks/data/"
-in_dir = "//data/generated_training_sets"
-out_dir = "/models/model_weights"
-file = "/cleavage_windows_human_only_13aa.pickle"
+parser = OptionParser()
+parser.add_option("-i", "--in-file",
+                  help="pickled dictionary of cleavage windows")
+parser.add_option("-o", "--out",
+                  help="output directory where results will be exported")
+parser.add_option("--human-only", action="store_true",
+                  help="flags export files with human only annotation")
+parser.add_option("--GPU", action="store_true",
+                  help="trains models using available GPU")
+(options, args) = parser.parse_args()
+
+# set CPU or GPU training
+if options.GPU:
+    dtype = torch.cuda.FloatTensor
+else:
+    dtype = torch.FloatTensor
+
 test_holdout_p = .2  # proportion of data held out for testing set
 n_epoch = 42
 
 # set seed for consistency
 torch.manual_seed(123)
+
 
 # define model structures
 class SeqNet(nn.Module):
@@ -94,7 +105,7 @@ if dtype is torch.cuda.FloatTensor:
     motif_model = motif_model.cuda()
 
 #  open pickled dictionary and load in data
-handle = open(in_dir + file, "rb")
+handle = open(options.in_file, "rb")
 data = pickle.load(handle)
 # subset to epitope data for this model
 data = data['epitope']
@@ -290,11 +301,15 @@ specificity = tn/(tn+fp)
 print("Sensitivity: ", sensitivity)
 print("Specificity: ", specificity)
 
-# save model states to file
-torch.save(seq_state, out_dir + "/human_only_epitope_sequence_mod.pt")
-torch.save(motif_state, out_dir + "/human_only_epitope_motif_mod.pt")
+if options.human_only:
+    torch.save(seq_state, options.out + "/human_epitope_sequence_mod.pt")
+    torch.save(motif_state, options.out + "/human_mammal_epitope_motif_mod.pt")
+else:
+    torch.save(seq_state, options.out + "/all_mammal_epitope_sequence_mod.pt")
+    torch.save(motif_state, options.out + "/all_mammal_epitope_motif_mod.pt")
 
 
+"""
 # generate plot of weights
 # look at position weights to see what areas are weighted most
 in_layer_weights = sequence_model.input.weight
@@ -315,3 +330,4 @@ plt.xlabel('distance from cleavage point')
 plt.title('')
 
 plt.show()
+"""

@@ -54,14 +54,36 @@ export MYSQL_PWD=[PASSWORD]
 
 ## split 20S and 26S data
 # split for all mammal
-python3 ./scripts/merging_and_filtering/split_by_subunit_type.py -i ./data/merged/merged_data_all_mammal_clean.csv -o ./data/merged
+# python3 ./scripts/merging_and_filtering/split_by_subunit_type.py -i ./data/merged/merged_data_all_mammal_clean.csv -o ./data/merged
 # if only human
-python3 ./scripts/merging_and_filtering/split_by_subunit_type.py -i ./data/merged/merged_data_human_only_clean.csv -o ./data/merged --human-only
+# python3 ./scripts/merging_and_filtering/split_by_subunit_type.py -i ./data/merged/merged_data_human_only_clean.csv -o ./data/merged --human-only
 
 ## generate the negative fragment examples based on annotated positives
+### for all mammals
 ## for 20S
-# python3 ./scripts/merging_and_filtering/negative_set_generation.py --full-negative-set -i ./data/merged/merged_data_all_mammal_clean.csv -o ./data/training_sets/all_mammal_windows_13aa.pickle
-# if only human data is desired
-# python3 ./scripts/merging_and_filtering/negative_set_generation.py --full-negative-set -i ./data/merged/merged_data_human_only_clean.csv -o ./data/training_sets/human_only_windows_13aa.pickle
-
+# python3 ./scripts/merging_and_filtering/negative_set_generation.py --full-negative-set -i ./data/merged/merged_20S_fragments.csv -o ./data/training_sets/all_mammal_20S_windows_13aa.pickle
 ## for 26S
+# python3 ./scripts/merging_and_filtering/negative_set_generation.py --full-negative-set -i ./data/merged/merged_26S_fragments.csv -o ./data/training_sets/all_mammal_26S_windows_13aa.pickle
+## for epitopes
+# python3 ./scripts/merging_and_filtering/negative_set_generation.py --full-negative-set -i ./data/merged/merged_epitope_fragments.csv -o ./data/training_sets/all_mammal_epitope_windows_13aa.pickle
+
+### for human only
+## for 20S
+# python3 ./scripts/merging_and_filtering/negative_set_generation.py --full-negative-set -i ./data/merged/merged_20S_fragments_human.csv -o ./data/training_sets/human_20S_windows_13aa.pickle
+## for 26S
+# python3 ./scripts/merging_and_filtering/negative_set_generation.py --full-negative-set -i ./data/merged/merged_26S_fragments_human.csv -o ./data/training_sets/human_26S_windows_13aa.pickle
+## for epitopes
+# python3 ./scripts/merging_and_filtering/negative_set_generation.py --full-negative-set -i ./data/merged/merged_epitope_fragments_human.csv -o ./data/training_sets/human_epitope_windows_13aa.pickle
+
+## run model training
+# 20S digestion
+python3 ./scripts/modeling/digestion_map_based_ensemble_net.py -i ./data/training_sets/all_mammal_20S_windows_13aa.pickle -o ./data/model_weights/
+# 20S if using human only
+python3 ./scripts/modeling/digestion_map_based_ensemble_net.py --human-only -i ./data/training_sets/human_20S_windows_13aa.pickle -o ./data/model_weights/
+
+# 26S
+
+# epitope
+# python3 ./scripts/modeling/epitope_based_ensemble_net.py -i ./data/training_sets/all_mammal_epitope_windows_13aa.pickle -o ./data/model_weights/
+# epitope if using human only
+# python3 ./scripts/modeling/epitope_based_ensemble_net.py --human-only -i ./data/training_sets/human_epitope_windows_13aa.pickle -o ./data/model_weights/
