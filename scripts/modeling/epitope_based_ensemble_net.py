@@ -38,7 +38,7 @@ else:
     dtype = torch.FloatTensor
 
 test_holdout_p = .2  # proportion of data held out for testing set
-n_epoch = 42
+n_epoch = 36
 
 # set seed for consistency
 torch.manual_seed(123)
@@ -303,7 +303,7 @@ print("Specificity: ", specificity)
 
 if options.human_only:
     torch.save(seq_state, options.out + "/human_epitope_sequence_mod.pt")
-    torch.save(motif_state, options.out + "/human_mammal_epitope_motif_mod.pt")
+    torch.save(motif_state, options.out + "/human_epitope_motif_mod.pt")
 else:
     torch.save(seq_state, options.out + "/all_mammal_epitope_sequence_mod.pt")
     torch.save(motif_state, options.out + "/all_mammal_epitope_motif_mod.pt")
