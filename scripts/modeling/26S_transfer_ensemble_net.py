@@ -17,6 +17,7 @@ import torch.optim as optim
 from sklearn import metrics
 import torch.nn.functional as F
 from optparse import OptionParser
+import pandas as pd
 
 # visualization tools
 import matplotlib.pyplot as plt
@@ -55,6 +56,7 @@ else:
 
 # set holdout amount and epochs
 test_holdout_p = .1
+val_holdout_p = .1
 n_epoch = 36
 
 # set seed for consistency
@@ -141,15 +143,16 @@ data = pickle.load(handle)
 # create list of cleavage windows
 positive_dict = data['proteasome']['positives']
 pos_windows = []
+# and statement added as temp fix for fragment error
 for key in positive_dict.keys():
-    if key not in pos_windows:
+    if key not in pos_windows and "&" not in key:
         pos_windows.append(key)
 
 # create list of non-cleavage windows
 negative_dict = data['proteasome']['negatives']
 neg_windows = []
 for key in negative_dict.keys():
-    if key not in neg_windows:
+    if key not in neg_windows and "&" not in key:
         neg_windows.append(key)
 
 # generate lists of proteasome type for each positive example
@@ -229,6 +232,9 @@ for key in neg_windows:
     if not i_flag:
         neg_immuno_proteasome.append(0)
 
+print("Positives: ", len(pos_windows))
+print("Negatives: ", len(neg_windows))
+
 # generate feature set for cleavage windows
 pos_feature_matrix = torch.from_numpy(generate_feature_array(pos_windows))
 # append proteasome type indicators
@@ -243,20 +249,33 @@ neg_feature_set = [f_set for f_set in zip(neg_feature_matrix,
                                           neg_immuno_proteasome)]
 
 # set number of positive and negative examples based on test proportion
-pos_train_k = torch.tensor(round((1-test_holdout_p) * len(pos_feature_set)))
-neg_train_k = torch.tensor(round((1-test_holdout_p) * len(pos_feature_set)))
+pos_train_k = torch.tensor(round((1-(test_holdout_p + val_holdout_p)) * len(pos_feature_set)))
+neg_train_k = torch.tensor(round((1-(test_holdout_p + val_holdout_p)) * len(pos_feature_set)))
 
 # permute and split data
 pos_perm = torch.randperm(torch.tensor(len(pos_feature_set)))
 pos_train = [pos_feature_set[i] for i in pos_perm[:pos_train_k]]
-pos_test = [pos_feature_set[i] for i in pos_perm[pos_train_k:]]
+pos_test = [pos_feature_set[i] for i in pos_perm[pos_train_k:(pos_train_k + round(len(pos_feature_set)*test_holdout_p))]]
+
+# for validation data:
+pos_val_list = [(pos_windows[i], pos_constitutive_proteasome[i], pos_immuno_proteasome[i], 1) for i in
+                pos_perm[(pos_train_k + round(len(pos_feature_set)*test_holdout_p)):]]
+pos_val_df = pd.DataFrame(pos_val_list, columns=['window', 'c_prot', 'i_prot', 'cleaved'])
+print(len(pos_feature_set), " total positive entries ", len(pos_val_list), "held for validation")
+
 
 neg_perm = torch.randperm(torch.tensor(len(neg_feature_set)))
 neg_train = [neg_feature_set[i] for i in neg_perm[:neg_train_k]]
 # force balanced testing set
-neg_test = [neg_feature_set[i] for i in neg_perm[neg_train_k:(torch.tensor(
-    len(pos_test)) + neg_train_k)]]
+neg_test = [neg_feature_set[i] for i in neg_perm[neg_train_k:(torch.tensor(len(pos_test)) + neg_train_k)]]
 
+# for validation data:
+neg_val_list = [(neg_windows[i], neg_constitutive_proteasome[i], neg_immuno_proteasome[i], 0) for i in
+                neg_perm[len(neg_test):(len(neg_test) + round(val_holdout_p*len(neg_feature_set)))]]
+neg_val_df = pd.DataFrame(neg_val_list, columns=['window', 'c_prot', 'i_prot', 'cleaved'])
+print(len(neg_feature_set), " total negative entries ", len(neg_val_list), "held for validation (balanced w/pos)")
+
+val_out = pos_val_df.append(neg_val_df)
 
 # pair training data with labels
 pos_train_labeled = []
@@ -399,11 +418,13 @@ if options.human_only:
                "/human_26S_digestion_sequence_mod.pt")
     torch.save(motif_state, options.out +
                "/human_26S_digestion_motif_mod.pt")
+    val_out.to_csv(options.out + "/human_26S_val_data.csv")
 else:
     torch.save(seq_state, options.out +
                "/all_mammal_26S_digestion_sequence_mod.pt")
     torch.save(motif_state, options.out +
                "/all_mammal_26S_digestion_motif_mod.pt")
+    val_out.to_csv(options.out + "/all_mammal_26S_val_data.csv")
 
 
 ## identify feature importance
