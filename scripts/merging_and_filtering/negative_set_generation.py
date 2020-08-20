@@ -522,5 +522,8 @@ if __name__ == '__main__':
 	# Store dataset to pickled dictionary
 	with open(args.output_dict, 'wb') as p:
 		pickle.dump(data_set, p)
-
+	print(len(data_set['epitope']['positives']) +
+		  len(data_set['epitope']['negatives']), " Epitope entries")
+	print(len(data_set['proteasome']['positives']) +
+		  len(data_set['proteasome']['negatives']), " Proteasome entries")
 	print(datetime.now(), 'Done!', file=sys.stderr)
