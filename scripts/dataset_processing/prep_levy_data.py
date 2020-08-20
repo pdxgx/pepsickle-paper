@@ -89,7 +89,7 @@ for progress, entry in enumerate(unique_protein_ids):
     if progress % 100 == 0:
         print(round(progress/len(unique_protein_ids)*100, 3), "% completed")
 
-assert len(error_index) == 0
+print(len(error_index), "Errors in retreiving protein sequence")
 
 levy_df = levy_df.dropna(subset=['gene_names'])
 out_df = pd.DataFrame(columns=levy_df.columns)
@@ -120,13 +120,13 @@ for i, entry in levy_df.iterrows():
         out_df = out_df.append(tmp_df, ignore_index=True)
 
     if i % 1000 == 0:
-        print(i, "entry completed")
+        print(i, "th entry completed")
 
 out_df = out_df.dropna(subset=["full_sequence"])
 
 # TODO: add protein id's as full_accession_id column
 # add columns needed in downstream processing
-out_df['entry_source'] = "Levy_data"
+out_df['entry_source'] = "cleavage_map"
 out_df['start_pos'] = None
 out_df['end_pos'] = None
 out_df['origin_species'] = "human"
