@@ -1,11 +1,24 @@
+#!/usr/bin/env python3
+"""
+prep_20S_digestion_val_data.py
+
+For issues contact Ben Weeder (weeder@ohsu.edu)
+
+This script loads 20S validation data and remaps column headers for consistency
+"""
+
 import pandas as pd
+from optparse import OptionParser
 
-in_file = "//data/validation_data/" \
-          "digestion_data/compiled_digestion_df.csv"
+parser = OptionParser()
+parser.add_option("-i", "--in-file",
+                  help="pickled dictionary of cleavage windows")
+parser.add_option("-o", "--out",
+                  help="output directory where results will be exported")
 
-out_file = "//data/validation_data/" \
-           "digestion_data/digestion_val_data_columns_remapped.csv"
-digestion_val = pd.read_csv(in_file)
+(options, args) = parser.parse_args()
+
+digestion_val = pd.read_csv(options.in_file)
 
 new_digestion_cols = ['lit_reference', 'protein_name', 'origin_species',
                       'Proteasome', 'Subunit', 'full_seq_accession', 'end_pos',
@@ -14,4 +27,4 @@ new_digestion_cols = ['lit_reference', 'protein_name', 'origin_species',
 digestion_val.columns = new_digestion_cols
 digestion_val['exclusions'] = None
 
-digestion_val.to_csv(out_file, index=False)
+digestion_val.to_csv(options.out_file, index=False)
