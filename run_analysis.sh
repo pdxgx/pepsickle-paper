@@ -89,6 +89,9 @@ export MYSQL_PWD=[PASSWORD]
 # epitope if using human only
 # python3 ./scripts/modeling/epitope_based_ensemble_net.py --human-only -i ./data/training_sets/human_epitope_windows_13aa.pickle -o ./data/model_weights/
 
+# compile model weights into single file
+python3 ./scripts/modeling/generate_model_dict.py -i ./data/model_weights/ -o ./data/model_weights/
+
 #### assess models on validation_prep data
 ## compile fragments for left out 20S digestion validation_prep data
 # python3 ./scripts/static_dataset_extractions/extract_digestion_data.py -i ./data/validation_data/digestion_data/raw/ -o ./data/validation_data/digestion_data/
