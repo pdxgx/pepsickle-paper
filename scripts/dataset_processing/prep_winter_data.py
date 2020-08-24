@@ -1,8 +1,10 @@
 #!usr/bin/env python3
 """
-prep_winder_data.py
+prep_winter_data.py
 
 For issues contact Ben Weeder (weeder@ohsu.edu)
+
+This script parses the input data from winter et al and exports formatted cleavage fragments.
 """
 
 import pandas as pd

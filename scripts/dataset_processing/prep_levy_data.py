@@ -1,6 +1,12 @@
 #!usr/bin/env python3
 """
+prep_levy_data.py
 
+For issues contact Ben Weeder (weeder@ohsu.edu)
+
+This script takes data from levy et al (CSV) and returns a dataframe with binarized
+presence/absence matrix of fragments cleaved by either the constitutive or immunoproteasome (or both).
+Full source protein sequences are also queried and exported with the final data frame as a CSV
 """
 
 import pandas as pd

@@ -1,7 +1,13 @@
 #!usr/bin/env python3
 """
+split_by_subunit_type.py
 
+For issues contact Ben Weeder (weeder@ohsu.edu)
+
+This script takes in processed cleavage fragments from degestion studies and devides them based on
+cleavage subunit-complex type.
 """
+
 import pandas as pd
 from optparse import OptionParser
 

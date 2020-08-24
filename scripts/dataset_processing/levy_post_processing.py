@@ -1,6 +1,11 @@
 #!usr/bin/env python3
 """
+prep_post_processing.py
 
+For issues contact Ben Weeder (weeder@ohsu.edu)
+
+This script takes a CSV of prepared data from levy et al and parses fragments with multiple potential sources to
+identify those with unambiguous cleavage windows. fragments with unique identifiers are exported to prevent duplications.
 """
 
 import pandas as pd
