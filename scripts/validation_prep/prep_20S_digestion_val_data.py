@@ -4,7 +4,7 @@ prep_20S_digestion_val_data.py
 
 For issues contact Ben Weeder (weeder@ohsu.edu)
 
-This script loads 20S validation data and remaps column headers for consistency
+This script loads 20S validation_prep data and remaps column headers for consistency
 """
 
 import pandas as pd
@@ -27,4 +27,5 @@ new_digestion_cols = ['lit_reference', 'protein_name', 'origin_species',
 digestion_val.columns = new_digestion_cols
 digestion_val['exclusions'] = None
 
-digestion_val.to_csv(options.out_file, index=False)
+digestion_val.to_csv(options.out + "/20S_digestion_val_columns_remapped.csv",
+                     index=False)

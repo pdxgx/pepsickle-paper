@@ -4,8 +4,9 @@ prep_epitope_validation_data.py
 
 For issues contact Ben Weeder (weeder@ohsu.edu)
 
-This script extracts MHC class I epitope examples from [DOI] and maps them to their source sequences. results are
-exported to a CSV and used downstream for model validation
+This script extracts MHC class I epitope examples from [DOI] and maps them to
+their source sequences. results are exported to a CSV and used downstream for
+model validation_prep
 """
 
 import pandas as pd
@@ -68,7 +69,7 @@ for p in range(len(unique_prots)):
         print(round(p/len(unique_prots), 3))
 
 # map source sequences to examples
-unambiguous_dat["full_sequence"] = None
+unambiguous_dat['full_sequence'] = None
 for e in range(len(unambiguous_dat)):
     # pull protein ID
     prot_id = str(unambiguous_dat.loc[e, "Proteins"])
@@ -82,7 +83,7 @@ unambiguous_dat = unambiguous_dat.dropna()
 new_cols = ['index', 'start_pos',  'end_pos', 'fragment', 'full_seq_accession',
             'full_sequence']
 unambiguous_dat.columns = new_cols
-unambiguous_dat['entry_source'] = "validation"
+unambiguous_dat['entry_source'] = "validation_prep"
 
 # export
 unambiguous_dat.to_csv(options.out + "/validation_epitopes_w_source.csv",
