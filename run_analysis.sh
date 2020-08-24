@@ -42,7 +42,7 @@ export MYSQL_PWD=[PASSWORD]
 # python3 ./scripts/merging_and_filtering/epitope_index_check.py -i ./data/processed/levy_fragments_ambiguous.csv -o ./data/processed/levy_fragments_ambiguous_mapped.csv
 # python3 ./scripts/dataset_processing/levy_post_processing.py -i ./data/processed/levy_fragments_ambiguous_mapped.csv -o ./data/processed/levy_fragments_unique_mapped.csv
 
-## Merge datasets together
+#### Merge datasets together
 # python3 ./scripts/merging_and_filtering/merge_datasets.py -i ./data/processed -o ./data/merged
 # NOTE run if only human data is desired
 # python3 ./scripts/merging_and_filtering/merge_datasets.py -i ./data/processed -o ./data/merged --human-only
@@ -77,13 +77,31 @@ export MYSQL_PWD=[PASSWORD]
 
 ## run model training
 # 20S digestion
-python3 ./scripts/modeling/digestion_map_based_ensemble_net.py -i ./data/training_sets/all_mammal_20S_windows_13aa.pickle -o ./data/model_weights/
+# python3 ./scripts/modeling/digestion_map_based_ensemble_net.py -i ./data/training_sets/all_mammal_20S_windows_13aa.pickle -o ./data/model_weights/
 # 20S if using human only
-python3 ./scripts/modeling/digestion_map_based_ensemble_net.py --human-only -i ./data/training_sets/human_20S_windows_13aa.pickle -o ./data/model_weights/
+# python3 ./scripts/modeling/digestion_map_based_ensemble_net.py --human-only -i ./data/training_sets/human_20S_windows_13aa.pickle -o ./data/model_weights/
 
 # 26S
+
 
 # epitope
 # python3 ./scripts/modeling/epitope_based_ensemble_net.py -i ./data/training_sets/all_mammal_epitope_windows_13aa.pickle -o ./data/model_weights/
 # epitope if using human only
 # python3 ./scripts/modeling/epitope_based_ensemble_net.py --human-only -i ./data/training_sets/human_epitope_windows_13aa.pickle -o ./data/model_weights/
+
+#### assess models on validation_prep data
+## compile fragments for left out 20S digestion validation_prep data
+# python3 ./scripts/static_dataset_extractions/extract_digestion_data.py -i ./data/validation_data/digestion_data/raw/ -o ./data/validation_data/digestion_data/
+# python3 ./scripts/validation_prep/prep_20S_digestion_val_data.py -i ./data/validation_data/digestion_data/compiled_digestion_df.csv -o ./data/validation_data/digestion_data/
+# python3 ./scripts/merging_and_filtering/epitope_index_check.py -i ./data/validation_data/digestion_data/20S_digestion_val_columns_remapped.csv -o ./data/validation_data/digestion_data/20S_digestion_val_data_indices_verified.csv
+
+## compile epitope validation_prep data
+# python3 ./scripts/validation_prep/prep_epitope_validation_data.py -i ./data/validation_data/epitope_data/41467_2016_BFncomms13404_MOESM1318_ESM.csv -o ./data/validation_data/epitope_data
+# python3 ./scripts/merging_and_filtering/epitope_index_check.py -i ./data/validation_data/epitope_data/validation_epitopes_w_source.csv -o ./data/validation_data/epitope_data/validation_epitopes_verified.csv
+
+## convert entries to cleavage windows
+# python3 ./scripts/merging_and_filtering/negative_set_generation.py -i ./data/validation_data/digestion_data/20S_digestion_val_data_indices_verified.csv -o ./data/validation_data/validation_sets_pre-filter/20S_val_windows_13aa_paired.pickle
+# python3 ./scripts/merging_and_filtering/negative_set_generation.py -i ./data/validation_data/epitope_data/validation_epitopes_verified.csv -o ./data/validation_data/validation_sets_pre-filter/epitope_val_windows_13aa_paired.pickle
+
+## filter out entries seen in training data
+# python3 ./scripts/validation_prep/filter_val_data.py -i ./data/validation_data/validation_sets_pre-filter -t ./data/training_sets -o ./data/validation_data/completed_validation_sets

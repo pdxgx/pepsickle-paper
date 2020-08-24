@@ -257,11 +257,11 @@ pos_perm = torch.randperm(torch.tensor(len(pos_feature_set)))
 pos_train = [pos_feature_set[i] for i in pos_perm[:pos_train_k]]
 pos_test = [pos_feature_set[i] for i in pos_perm[pos_train_k:(pos_train_k + round(len(pos_feature_set)*test_holdout_p))]]
 
-# for validation data:
+# for validation_prep data:
 pos_val_list = [(pos_windows[i], pos_constitutive_proteasome[i], pos_immuno_proteasome[i], 1) for i in
                 pos_perm[(pos_train_k + round(len(pos_feature_set)*test_holdout_p)):]]
 pos_val_df = pd.DataFrame(pos_val_list, columns=['window', 'c_prot', 'i_prot', 'cleaved'])
-print(len(pos_feature_set), " total positive entries ", len(pos_val_list), "held for validation")
+print(len(pos_feature_set), " total positive entries ", len(pos_val_list), "held for validation_prep")
 
 
 neg_perm = torch.randperm(torch.tensor(len(neg_feature_set)))
@@ -269,11 +269,11 @@ neg_train = [neg_feature_set[i] for i in neg_perm[:neg_train_k]]
 # force balanced testing set
 neg_test = [neg_feature_set[i] for i in neg_perm[neg_train_k:(torch.tensor(len(pos_test)) + neg_train_k)]]
 
-# for validation data:
+# for validation_prep data:
 neg_val_list = [(neg_windows[i], neg_constitutive_proteasome[i], neg_immuno_proteasome[i], 0) for i in
                 neg_perm[len(neg_test):(len(neg_test) + round(val_holdout_p*len(neg_feature_set)))]]
 neg_val_df = pd.DataFrame(neg_val_list, columns=['window', 'c_prot', 'i_prot', 'cleaved'])
-print(len(neg_feature_set), " total negative entries ", len(neg_val_list), "held for validation (balanced w/pos)")
+print(len(neg_feature_set), " total negative entries ", len(neg_val_list), "held for validation_prep (balanced w/pos)")
 
 val_out = pos_val_df.append(neg_val_df)
 
