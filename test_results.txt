@@ -1,0 +1,91 @@
+Epitope Validation AUC:  0.8614120403066466
+Epitope Classification Report:
+               precision    recall  f1-score   support
+
+           0       0.85      0.75      0.80      4309
+           1       0.73      0.83      0.78      3521
+
+    accuracy                           0.79      7830
+   macro avg       0.79      0.79      0.79      7830
+weighted avg       0.80      0.79      0.79      7830
+
+
+
+Constitutive 20S Validation AUC:  0.7287254280279011
+constitutive 20S Classification Report:
+               precision    recall  f1-score   support
+
+           0       0.65      0.64      0.65        95
+           1       0.60      0.60      0.60        83
+
+    accuracy                           0.62       178
+   macro avg       0.62      0.62      0.62       178
+weighted avg       0.62      0.62      0.62       178
+
+
+
+immunoproteasome 20S Validation AUC:  0.6425000000000001
+immunoproteasome 20S Classification Report:
+               precision    recall  f1-score   support
+
+           0       0.42      0.85      0.57        20
+           1       0.85      0.42      0.57        40
+
+    accuracy                           0.57        60
+   macro avg       0.64      0.64      0.57        60
+weighted avg       0.71      0.57      0.57        60
+
+
+
+Constitutive 26S Validation AUC:  0.8661511005353957
+constitutive 26S Classification Report:
+               precision    recall  f1-score   support
+
+           0       0.71      1.00      0.83        82
+           1       1.00      0.60      0.75        82
+
+    accuracy                           0.80       164
+   macro avg       0.86      0.80      0.79       164
+weighted avg       0.86      0.80      0.79       164
+
+
+
+Immunoproteasome 26S Validation AUC:  0.9691358024691359
+Immunoproteasome 26S Classification Report:
+               precision    recall  f1-score   support
+
+           0       0.78      1.00      0.88        72
+           1       1.00      0.72      0.84        72
+
+    accuracy                           0.86       144
+   macro avg       0.89      0.86      0.86       144
+weighted avg       0.89      0.86      0.86       144
+
+
+
+Constitutive 20S by 26S model Validation AUC:  0.5572606214331007
+constitutive 20S by 26S model Classification Report:
+               precision    recall  f1-score   support
+
+           0       0.57      0.81      0.67        95
+           1       0.58      0.30      0.40        83
+
+    accuracy                           0.57       178
+   macro avg       0.58      0.56      0.53       178
+weighted avg       0.58      0.57      0.54       178
+
+
+
+immunoproteasome 20S by 26S model Validation AUC:  0.585
+immunoproteasome 20S by 26S model Classification Report:
+               precision    recall  f1-score   support
+
+           0       0.35      0.85      0.50        20
+           1       0.75      0.23      0.35        40
+
+    accuracy                           0.43        60
+   macro avg       0.55      0.54      0.42        60
+weighted avg       0.62      0.43      0.40        60
+
+
+

@@ -90,7 +90,7 @@ export MYSQL_PWD=[PASSWORD]
 # python3 ./scripts/modeling/epitope_based_ensemble_net.py --human-only -i ./data/training_sets/human_epitope_windows_13aa.pickle -o ./data/model_weights/
 
 # compile model weights into single file
-python3 ./scripts/modeling/generate_model_dict.py -i ./data/model_weights/ -o ./data/model_weights/
+# python3 ./scripts/modeling/generate_model_dict.py -i ./data/model_weights/ -o ./data/model_weights/
 
 #### assess models on validation_prep data
 ## compile fragments for left out 20S digestion validation_prep data
@@ -108,3 +108,6 @@ python3 ./scripts/modeling/generate_model_dict.py -i ./data/model_weights/ -o ./
 
 ## filter out entries seen in training data
 # python3 ./scripts/validation_prep/filter_val_data.py -i ./data/validation_data/validation_sets_pre-filter -t ./data/training_sets -o ./data/validation_data/completed_validation_sets
+
+## run models on validation sets
+python3 ./scripts/model_comparisons/validate_models.py -i ./data/validation_data/completed_validation_sets/window_dictionaries -m ./data/model_weights/trained_model_dict.pickle > test_results.txt
