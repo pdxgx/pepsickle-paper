@@ -124,7 +124,7 @@ pickle.dump(digestion_constit_windows_filtered,
 
 pickle.dump(digestion_immuno_windows_filtered,
             open(options.out + "/window_dictionaries" +
-                 "/digestion_immuno_validation_filtered.pickle", "wb"))
+                 "/20S_digestion_immuno_validation_filtered.pickle", "wb"))
 
 
 # export as fasta files
@@ -187,3 +187,5 @@ for i in range(len(digestion_immuno_negative_windows)):
     digestion_immuno_val_fasta.write("\n")
 
 digestion_immuno_val_fasta.close()
+
+
