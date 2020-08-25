@@ -28,7 +28,7 @@ for f in os.listdir(options.in_dir):
         if f.endswith(".pt"):
             path = options.in_dir + "/" + f
             mod_name, ext = os.path.splitext(f)
-            mod = torch.load(path)
+            mod = torch.load(path, map_location=torch.device('cpu'))
             model_dict[mod_name] = mod
 
 out_file = options.out + "/trained_model_dict.pickle"

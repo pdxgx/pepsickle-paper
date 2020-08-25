@@ -280,12 +280,6 @@ def create_windows_from_protein(protein_seq):
 # create output function that generates table...
 
 
-
-
-
-
-
-
 handle = "/Users/weeder/PycharmProjects/pepsickle/data/validation_data/" \
          "completed_validation_sets/window_dictionaries/" \
          "epitope_val_filtered.pickle"
@@ -293,7 +287,7 @@ epitope_val_dict = pickle.load(open(handle, "rb"))
 epitope_positives = list(epitope_val_dict['positives'].keys())
 epitope_positive_features = generate_feature_array(epitope_positives)
 epitope_negatives = list(epitope_val_dict['negatives'].keys())
-epitope_negative_features =generate_feature_array(epitope_negatives)
+epitope_negative_features = generate_feature_array(epitope_negatives)
 
 epitope_model = initialize_epitope_model(all_mammal=False)
 pos_preds = predict_epitope_mod(epitope_model, epitope_positive_features)
