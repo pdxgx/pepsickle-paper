@@ -414,15 +414,15 @@ motif_model.eval()
 
 # save model states to file
 if options.human_only:
-    torch.save(seq_state.cpu(), options.out +
+    torch.save(seq_state, options.out +
                "/human_26S_digestion_sequence_mod.pt")
-    torch.save(motif_state.cpu(), options.out +
+    torch.save(motif_state, options.out +
                "/human_26S_digestion_motif_mod.pt")
     val_out.to_csv(options.out + "/human_26S_val_data.csv")
 else:
-    torch.save(seq_state.cpu(), options.out +
+    torch.save(seq_state, options.out +
                "/all_mammal_26S_digestion_sequence_mod.pt")
-    torch.save(motif_state.cpu(), options.out +
+    torch.save(motif_state, options.out +
                "/all_mammal_26S_digestion_motif_mod.pt")
     val_out.to_csv(options.out + "/all_mammal_26S_val_data.csv")
 
