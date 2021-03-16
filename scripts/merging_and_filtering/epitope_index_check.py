@@ -4,7 +4,11 @@ epitope_index_check.py
 
 For issues contact Ben Weeder (weeder@ohsu.edu)
 
+This script verifies the location of each reported fragment within its source
+and will attempt to repair indices for misreported locations.
 
+-i, --in_file: file with reported fragments and indices to be verified
+-o, --out_file: file with all verified fragments
 """
 
 from sequence_featurization_tools import *
@@ -121,5 +125,33 @@ df.drop(index=mismatch_indices, inplace=True)
 df = df.reset_index(drop=True)
 
 print("Total entries left: ", len(df))
+
+print("Data Summary: ")
+print(df['Subunit'].value_counts())
+
+df_20S = df[df['Subunit'] == "20S"]
+if len(df_20S) > 0:
+    print("20S Total Unique Fragments: ",
+          len(df_20S['fragment'].unique()))
+    print("20S Total Unique Source proteins: ",
+          len(df_20S['full_sequence'].unique()))
+    print("20S Fragment to Source Ratio: ",
+          len(df_20S['fragment'].unique())/len(df_20S['full_sequence'].unique()))
+
+df_26S = df[df['Subunit'] == "26S"]
+if len(df_26S) > 0:
+    print("26S Total Unique Source proteins: ",
+          len(df_26S['full_sequence'].unique()))
+    print("26S Fragment to Source Ratio: ",
+          len(df_26S['fragment'].unique())/len(df_26S['full_sequence'].unique()))
+
+df_epitope = df[df['Subunit'].isnull()]
+if len(df_epitope) > 0:
+    print("Epitope unique fragments: ",
+          len(df_epitope['fragment'].unique()))
+    print("Epitope Total Unique Source proteins: ",
+          len(df_epitope['full_sequence'].unique()))
+    print("Epitope Fragment to Source Ratio: ",
+          len(df_epitope['fragment'].unique())/len(df_epitope['full_sequence'].unique()))
 
 df.to_csv(options.out_file, index=False)
