@@ -72,8 +72,8 @@ for doi in doi_entries:
 
 
 # print out summary info
-print(len(digestion_df['DOI'].unique()))
-print(len(digestion_df))
+print("Number of Studies: ", len(digestion_df['DOI'].unique()))
+print("Number of Entries: ", len(digestion_df))
 print(digestion_df['Proteasome'].value_counts())
 
 # export
