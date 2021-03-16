@@ -4,7 +4,12 @@ prep_winter_data.py
 
 For issues contact Ben Weeder (weeder@ohsu.edu)
 
-This script parses the input data from winter et al and exports formatted cleavage fragments.
+This script parses the input data from winter et al and exports formatted
+cleavage fragments.
+
+options:
+-i, --in_file: CSV of winter et al. fragments
+-o, --out_dir: location to export updated CSV
 """
 
 import pandas as pd

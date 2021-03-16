@@ -4,12 +4,11 @@ get_SYFPEITHI_source_sequences.py
 
 For issues contact Ben Weeder (weeder@ohsu.edu)
 
-This script takes data from a CSV of breast_cancer_data epitopes results and returns
-an updated CSV that includes source protein sequences. Column names are also
-updated for consistency with other databases and easier downstream merging
+This script takes data from the SYFPEITHI database and maps reported fragments
+back to their sequences of origin.
 
 options:
--i, --in_file: CSV of AntiJen results from database
+-i, --in_file: CSV of SYFPEITHI results from database
 -o, --out_dir: location to export updated CSV
 """
 from extraction_functions import *
