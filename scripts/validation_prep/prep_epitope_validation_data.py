@@ -1,12 +1,12 @@
-#!/usr/bin/env python3
+ #!/usr/bin/env python3
 """
 prep_epitope_validation_data.py
 
 For issues contact Ben Weeder (weeder@ohsu.edu)
 
-This script extracts MHC class I epitope examples from [DOI] and maps them to
-their source sequences. results are exported to a CSV and used downstream for
-model validation_prep
+This script extracts MHC class I epitope examples from
+[https://doi.org/10.1038/ncomms13404] and maps them to their source sequences.
+results are exported to a CSV and used downstream for model validation_prep
 """
 
 import pandas as pd
