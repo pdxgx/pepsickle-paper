@@ -10,12 +10,14 @@ digestion map data. Exports trained model wieghts.
 """
 
 from sequence_featurization_tools import *
+from captum.attr import Saliency
 import pickle
 import torch
 import torch.nn as nn
 import torch.optim as optim
 from sklearn import metrics
 import torch.nn.functional as F
+import pandas as pd
 from optparse import OptionParser
 
 # visualization tools
@@ -37,6 +39,8 @@ parser.add_option("-i", "--in-file",
                   help="pickled dictionary of cleavage windows")
 parser.add_option("-o", "--out",
                   help="output directory where results will be exported")
+parser.add_option("-w", "--window-size", default=7,
+                  help="sets input wintow size for DL models")
 parser.add_option("--human-only", action="store_true",
                   help="flags export files with human only annotation")
 parser.add_option("--GPU", action="store_true",
@@ -50,7 +54,7 @@ else:
     dtype = torch.FloatTensor
 
 # set holdout amount and epochs
-test_holdout_p = .1
+test_holdout_p = .2
 n_epoch = 36
 
 # set seed for consistency
@@ -61,8 +65,10 @@ torch.manual_seed(123)
 class SeqNet(nn.Module):
     def __init__(self):
         super().__init__()
-        self.drop = nn.Dropout(p=0.2)
-        self.input = nn.Linear(262, 136)
+        # self.in_nodes = 262 # for normal 13aa window
+        self.in_nodes = int(options.window_size) * 20 + 2
+        self.drop = nn.Dropout(p=0.25)
+        self.input = nn.Linear(self.in_nodes, 136)
         self.bn1 = nn.BatchNorm1d(136)
         self.fc1 = nn.Linear(136, 68)
         self.bn2 = nn.BatchNorm1d(68)
@@ -88,10 +94,12 @@ class SeqNet(nn.Module):
 class MotifNet(nn.Module):
     def __init__(self):
         super().__init__()
-        self.drop = nn.Dropout(p=.2)
+        # self.in_nodes = 46
+        self.in_nodes = (int(options.window_size) - 2) * 4 + 2
+        self.drop = nn.Dropout(p=.25)
         self.conv = nn.Conv1d(4, 4, 3, groups=4)
         # self.fc1 = nn.Linear(78, 38)
-        self.fc1 = nn.Linear(46, 38)
+        self.fc1 = nn.Linear(self.in_nodes, 38)
         self.bn1 = nn.BatchNorm1d(38)
         self.fc2 = nn.Linear(38, 20)
         self.bn2 = nn.BatchNorm1d(20)
@@ -219,17 +227,24 @@ for key in neg_windows:
         neg_immuno_proteasome.append(0)
 
 # generate feature set for cleavage windows
-pos_feature_matrix = torch.from_numpy(generate_feature_array(pos_windows))
+pos_features = generate_feature_array(pos_windows)
+pos_feature_matrix = torch.from_numpy(pos_features)
+
 # append proteasome type indicators
 pos_feature_set = [f_set for f_set in zip(pos_feature_matrix,
                                           pos_constitutive_proteasome,
                                           pos_immuno_proteasome)]
 
+print("Positive examples:", len(pos_feature_set))
+
 # generate feature set for non-cleavage windows
-neg_feature_matrix = torch.from_numpy(generate_feature_array(neg_windows))
+neg_features = generate_feature_array(neg_windows)
+neg_feature_matrix = torch.from_numpy(neg_features)
 neg_feature_set = [f_set for f_set in zip(neg_feature_matrix,
                                           neg_constitutive_proteasome,
                                           neg_immuno_proteasome)]
+
+print("Negative examples:", len(neg_feature_set))
 
 # set number of positive and negative examples based on test proportion
 pos_train_k = torch.tensor(round((1-test_holdout_p) * len(pos_feature_set)))
@@ -269,7 +284,33 @@ for i in range(len(neg_test)):
 
 test_data = pos_test_labeled + neg_test_labeled
 test_loader = torch.utils.data.DataLoader(
-    test_data, batch_size=64, shuffle=True)
+    test_data, batch_size=int(len(test_data)/n_epoch+1), shuffle=True)
+
+m, n, r = pos_features[:, :, 22:].shape
+ep_training_features = pd.DataFrame(pos_features[:, :, 22:].reshape(-1, n*r))
+ep_training_features['class'] = "pos"
+tmp_neg = pd.DataFrame(neg_features[:, :, 22:].reshape(-1, n*r))
+tmp_neg['class'] = "neg"
+ep_training_features = ep_training_features.append(tmp_neg)
+ep_training_features.to_csv("/Users/weeder/PycharmProjects/pepsickle-paper/"
+                            "data/validation_data/output/plots/"
+                            "20S_physical_training_windows" +
+                            str(options.window_size) + "aa.csv")
+print("physical training windows exported")
+
+m, n, r = pos_features[:, :, :20].shape
+ep_training_features = pd.DataFrame(pos_features[:, :, :20].reshape(-1, n*r))
+ep_training_features['class'] = "pos"
+tmp_neg = pd.DataFrame(neg_features[:, :, :20].reshape(-1, n*r))
+tmp_neg['class'] = "neg"
+ep_training_features = ep_training_features.append(tmp_neg)
+ep_training_features.to_csv("/Users/weeder/PycharmProjects/pepsickle-paper/"
+                            "data/validation_data/output/plots/"
+                            "20S_sequence_training_windows" +
+                            str(options.window_size) + "aa.csv")
+print("sequence training windows exported")
+
+
 
 # establish training parameters
 # inverse weighting for class imbalance in training set
@@ -378,10 +419,49 @@ for epoch in range(n_epoch):
     motif_model.train()
 
 # re-set model states to best performing model
+t_dat, t_labels = next(iter(test_loader))
 sequence_model.load_state_dict(seq_state)
 sequence_model.eval()
 motif_model.load_state_dict(motif_state)
 motif_model.eval()
+
+# performance with seq only was best so use to determine performance
+seq_est = torch.exp(
+    sequence_model(t_dat[0].type(dtype)[:, :, :20], t_dat[1].clone().detach().type(dtype),
+                t_dat[2].clone().detach().type(dtype)))[:, 1].cpu()
+
+motif_est = torch.exp(motif_model(t_dat[0].type(dtype)[:, :, 22:],
+                                  t_dat[1].clone().detach().type(dtype),
+                                  t_dat[2].clone().detach().type(dtype)))[:, 1].cpu()
+
+overall_est = (seq_est + motif_est)/2
+
+preds_out = pd.DataFrame(list(zip(t_labels.detach().numpy(),
+                                  t_dat[1].detach().numpy(),
+                                  t_dat[2].detach().numpy(),
+                                  overall_est.detach().numpy())),
+                         columns=['class', 'c_prot', 'i_prot', 'pred'])
+
+preds_out.to_csv("./data/validation_data/output/in_vitro_net_test_" +
+                 str(options.window_size)+"aa_preds.csv", index=False)
+
+# call classes so that sensitivity and specificity can be calculated
+guess_class = []
+for est in overall_est:
+    if est >= .5:  # changing threshold alters se and sp, .5 = default
+        guess_class.append(1)
+    else:
+        guess_class.append(0)
+
+# print AUC
+auc = metrics.roc_auc_score(t_labels.detach().numpy(),
+                            overall_est.detach().numpy())
+print(auc)
+
+# Print classification report
+report = metrics.classification_report(t_labels.detach().numpy(),
+                                           guess_class)
+print(report)
 
 # save model states to file
 if options.human_only:
@@ -398,9 +478,77 @@ else:
 
 ## identify feature importance
 # define also
-"""
+## identify feature importance
 saliency = Saliency(motif_model)
-grads = saliency.attribute((dat[0][:, :, 22:], dat[1].float(), dat[2].float()), target=labels)
-grads = np.transpose(grads.squeeze().cpu)
-"""
+
+pos_saliency_loader = torch.utils.data.DataLoader(pos_train,
+                                                  batch_size=len(pos_train))
+pos_saliency = next(iter(pos_saliency_loader))
+pos_grads = saliency.attribute((pos_saliency[0][:, :, 22:].type(dtype),
+                                pos_saliency[1].type(dtype),
+                                pos_saliency[2].type(dtype)), target=1,
+                               abs=False)
+
+neg_saliency_loader = torch.utils.data.DataLoader(neg_train,
+                                                  batch_size=len(neg_train))
+
+neg_saliency = next(iter(neg_saliency_loader))
+neg_grads = saliency.attribute((neg_saliency[0][:, :, 22:].type(dtype),
+                                neg_saliency[1].type(dtype),
+                                neg_saliency[2].type(dtype)), target=0,
+                               abs=False)
+
+pos_c_flag = [i == 1 for i in pos_saliency[1]]
+pos_i_flag = [i == 0 for i in pos_saliency[1]]
+
+neg_c_flag = [i == 1 for i in neg_saliency[1]]
+neg_i_flag = [i == 0 for i in neg_saliency[1]]
+
+c_pos_mean = pos_grads[0][pos_c_flag, :, :].mean(axis=0)
+i_pos_mean = pos_grads[0][pos_i_flag, :, :].mean(axis=0)
+c_neg_mean = neg_grads[0][neg_c_flag, :, :].mean(axis=0)
+i_neg_mean = neg_grads[0][neg_i_flag, :, :].mean(axis=0)
+
+motif_df = pd.DataFrame(c_pos_mean, dtype=float)
+motif_df = motif_df.append(pd.DataFrame(i_pos_mean, dtype=float))
+motif_df = motif_df.append(pd.DataFrame(c_neg_mean, dtype=float))
+motif_df = motif_df.append(pd.DataFrame(i_neg_mean, dtype=float))
+
+motif_df['prot_type'] = ['c']*len(c_pos_mean) + ['i']*len(i_pos_mean) +\
+                      ['c']*len(c_neg_mean) + ['i']*len(i_neg_mean)
+
+motif_df['cleave_type'] = ['y']*len(c_pos_mean) + ['y']*len(i_pos_mean) +\
+                        ['n']*len(c_neg_mean) + ['n']*len(i_neg_mean)
+
+
+saliency = Saliency(sequence_model)
+pos_grads = saliency.attribute((pos_saliency[0][:, :, :20].type(dtype),
+                                pos_saliency[1].type(dtype),
+                                pos_saliency[2].type(dtype)), target=1,
+                               abs=False)
+
+neg_grads = saliency.attribute((neg_saliency[0][:, :, :20].type(dtype),
+                                neg_saliency[1].type(dtype),
+                                neg_saliency[2].type(dtype)), target=0,
+                               abs=False)
+
+c_pos_mean = pos_grads[0][pos_c_flag, :, :].mean(axis=0)
+i_pos_mean = pos_grads[0][pos_i_flag, :, :].mean(axis=0)
+c_neg_mean = neg_grads[0][neg_c_flag, :, :].mean(axis=0)
+i_neg_mean = neg_grads[0][neg_i_flag, :, :].mean(axis=0)
+
+sequence_df = pd.DataFrame(c_pos_mean, dtype=float)
+sequence_df = sequence_df.append(pd.DataFrame(i_pos_mean, dtype=float))
+sequence_df = sequence_df.append(pd.DataFrame(c_neg_mean, dtype=float))
+sequence_df = sequence_df.append(pd.DataFrame(i_neg_mean, dtype=float))
+
+sequence_df['prot_type'] = ['c']*len(c_pos_mean) + ['i']*len(i_pos_mean) +\
+                      ['c']*len(c_neg_mean) + ['i']*len(i_neg_mean)
+
+sequence_df['cleave_type'] = ['y']*len(c_pos_mean) + ['y']*len(i_pos_mean) +\
+                        ['n']*len(c_neg_mean) + ['n']*len(i_neg_mean)
+
+
+motif_df.to_csv("./data/validation_data/output/plots/20S_motif_saliency.csv", index=False)
+sequence_df.to_csv("./data/validation_data/output/plots/20S_sequence_saliency.csv", index=False)
 

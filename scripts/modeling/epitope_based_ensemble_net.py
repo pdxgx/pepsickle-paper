@@ -4,17 +4,19 @@ epitope_based_ensemble_net.py
 
 For issues contact Ben Weeder (weeder@ohsu.edu)
 
-This script contains trains neural networks based on both the sequence identity
+This script trains neural networks based on both the sequence identity
 and physical property motifs of cleavage and non-cleavage examples from epitope
 databases. Exports trained model wieghts.
 """
 from sequence_featurization_tools import *
+from captum.attr import Saliency
 import pickle
 import torch
 import torch.nn as nn
 import torch.optim as optim
 from sklearn import metrics
 import torch.nn.functional as F
+import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from optparse import OptionParser
@@ -25,6 +27,8 @@ parser.add_option("-i", "--in-file",
                   help="pickled dictionary of cleavage windows")
 parser.add_option("-o", "--out",
                   help="output directory where results will be exported")
+parser.add_option("-w", "--window-size", default=17,
+                  help="sets input wintow size for DL models")
 parser.add_option("--human-only", action="store_true",
                   help="flags export files with human only annotation")
 parser.add_option("--GPU", action="store_true",
@@ -48,8 +52,10 @@ torch.manual_seed(123)
 class SeqNet(nn.Module):
     def __init__(self):
         super().__init__()
+        # self.in_nodes = 260 # for normal 13aa window
+        self.in_nodes = int(options.window_size) * 20
         self.drop = nn.Dropout(p=0.2)
-        self.input = nn.Linear(260, 136)
+        self.input = nn.Linear(self.in_nodes, 136)
         self.bn1 = nn.BatchNorm1d(136)
         self.fc1 = nn.Linear(136, 68)
         self.bn2 = nn.BatchNorm1d(68)
@@ -72,9 +78,11 @@ class SeqNet(nn.Module):
 class MotifNet(nn.Module):
     def __init__(self):
         super().__init__()
+        # self.in_nodes = 44
+        self.in_nodes = (int(options.window_size) - 2) * 4
         self.drop = nn.Dropout(p=0.2)
         self.conv = nn.Conv1d(4, 4, 3, groups=4)
-        self.fc1 = nn.Linear(44, 38)
+        self.fc1 = nn.Linear(self.in_nodes, 38)
         self.bn1 = nn.BatchNorm1d(38)
         self.fc2 = nn.Linear(38, 20)
         self.bn2 = nn.BatchNorm1d(20)
@@ -116,7 +124,8 @@ for key in data['positives'].keys():
     pos_windows.append(key)
 
 # generate features
-pos_feature_matrix = torch.from_numpy(generate_feature_array(pos_windows))
+pos_features = generate_feature_array(pos_windows)
+pos_feature_matrix = torch.from_numpy(pos_features)
 
 # create list of non cleavage windows
 neg_windows = []
@@ -125,7 +134,8 @@ for key in data['negatives'].keys():
     neg_windows.append(key)
 
 # generate features
-neg_feature_matrix = torch.from_numpy(generate_feature_array(neg_windows))
+neg_features = generate_feature_array(neg_windows)
+neg_feature_matrix = torch.from_numpy(neg_features)
 
 # define number of training cases based on holdout (unbalanced)
 pos_train_k = round((1-test_holdout_p) * pos_feature_matrix.size(0))
@@ -167,7 +177,33 @@ for i in range(len(neg_test)):
 test_data = pos_test_labeled + neg_test_labeled
 # set batch size to give unique set with no re-use
 test_loader = torch.utils.data.DataLoader(
-    test_data, batch_size=int(len(test_data)/n_epoch), shuffle=True)
+    test_data, batch_size=int(len(test_data)/n_epoch + 1), shuffle=True)
+
+
+m, n, r = pos_features[:, :, 22:].shape
+ep_training_features = pd.DataFrame(pos_features[:, :, 22:].reshape(-1, n*r))
+ep_training_features['class'] = "pos"
+tmp_neg = pd.DataFrame(neg_features[:, :, 22:].reshape(-1, n*r))
+tmp_neg['class'] = "neg"
+ep_training_features = ep_training_features.append(tmp_neg)
+ep_training_features.to_csv("/Users/weeder/PycharmProjects/pepsickle-paper/"
+                            "data/validation_data/output/plots/"
+                            "epitope_physical_training_windows" +
+                            str(options.window_size) + "aa.csv")
+print("physical training windows exported")
+
+m, n, r = pos_features[:, :, :20].shape
+ep_training_features = pd.DataFrame(pos_features[:, :, :20].reshape(-1, n*r))
+ep_training_features['class'] = "pos"
+tmp_neg = pd.DataFrame(neg_features[:, :, :20].reshape(-1, n*r))
+tmp_neg['class'] = "neg"
+ep_training_features = ep_training_features.append(tmp_neg)
+ep_training_features.to_csv("/Users/weeder/PycharmProjects/pepsickle-paper/"
+                            "data/validation_data/output/plots/"
+                            "epitope_sequence_training_windows" +
+                            str(options.window_size) + "aa.csv")
+print("sequence training windows exported")
+
 
 # establish training parameters
 # inverse weighting for class imbalance in training set
@@ -175,8 +211,8 @@ seq_criterion = nn.NLLLoss(
     weight=torch.tensor([1, len(neg_train)/len(pos_train)]).type(dtype))
 seq_optimizer = optim.Adam(sequence_model.parameters(), lr=.001)
 
-motif_criterion = nn.NLLLoss\
-    (weight=torch.tensor([1, len(neg_train)/len(pos_train)]).type(dtype))
+motif_criterion = nn.NLLLoss(
+    weight=torch.tensor([1, len(neg_train)/len(pos_train)]).type(dtype))
 motif_optimizer = optim.Adam(motif_model.parameters(), lr=.001)
 
 # initialize tracking of optimal models and train
@@ -274,6 +310,15 @@ motif_model.eval()
 
 # performance with seq only was best so use to determine performance
 seq_est = torch.exp(sequence_model(t_dat.type(dtype)[:, :, :20]))[:, 1].cpu()
+motif_est = torch.exp(motif_model(t_dat.type(dtype)[:, :, 22:]))[:, 1].cpu()
+
+overall_est = (seq_est + motif_est)/2
+
+preds_out = pd.DataFrame(list(zip(t_labels, overall_est)), columns=['class',
+                                                                    'pred'])
+preds_out.to_csv("./data/validation_data/output/epitope_test_" +
+                 str(options.window_size)+"aa_preds.csv", index=False)
+
 # call classes so that sensitivity and specificity can be calculated
 seq_guess_class = []
 for est in seq_est:
@@ -309,25 +354,54 @@ else:
     torch.save(motif_state, options.out + "/all_mammal_epitope_motif_mod.pt")
 
 
-"""
-# generate plot of weights
-# look at position weights to see what areas are weighted most
-in_layer_weights = sequence_model.input.weight
-# sum across all second layer connections
-in_layer_weights = in_layer_weights.abs().sum(dim=0)
-# reshape to match original input
-in_layer_weights = in_layer_weights.reshape(13, -1)
-# sum across values per position
-input_sums = in_layer_weights.sum(dim=1).detach().numpy()
+# export saliencies
+saliency = Saliency(motif_model)
 
-# plot
-positions = range(-6, 7)
-y_pos = np.arange(len(positions))
-plt.bar(y_pos, input_sums, align='center', alpha=0.5)
-plt.xticks(y_pos, positions)
-plt.ylabel('weight')
-plt.xlabel('distance from cleavage point')
-plt.title('')
+pos_saliency_loader = torch.utils.data.DataLoader(pos_train,
+                                                  batch_size=len(pos_train))
+pos_saliency = next(iter(pos_saliency_loader))
 
-plt.show()
-"""
+print(len(pos_saliency))
+print(pos_saliency.shape)
+
+pos_grads = saliency.attribute(pos_saliency[:, :, 22:].type(dtype),
+                               target=1,
+                               abs=True)
+
+neg_saliency_loader = torch.utils.data.DataLoader(neg_train,
+                                                  batch_size=len(neg_train))
+
+neg_saliency = next(iter(neg_saliency_loader))
+neg_grads = saliency.attribute(neg_saliency[:, :, 22:].type(dtype),
+                               target=0,
+                               abs=True)
+
+pos_mean = pos_grads.mean(axis=0)
+neg_mean = neg_grads.mean(axis=0)
+
+motif_df = pd.DataFrame(pos_mean, dtype=float)
+motif_df = motif_df.append(pd.DataFrame(neg_mean, dtype=float))
+
+motif_df['cleave_type'] = ['y']*len(pos_mean) + ['n']*len(neg_mean)
+
+
+saliency = Saliency(sequence_model)
+pos_grads = saliency.attribute(pos_saliency[:, :, :20].type(dtype),
+                               target=1,
+                               abs=True)
+
+neg_grads = saliency.attribute(neg_saliency[:, :, :20].type(dtype),
+                               target=0,
+                               abs=True)
+
+pos_mean = pos_grads.mean(axis=0)
+neg_mean = neg_grads.mean(axis=0)
+
+sequence_df = pd.DataFrame(pos_mean, dtype=float)
+sequence_df = sequence_df.append(pd.DataFrame(neg_mean, dtype=float))
+
+sequence_df['cleave_type'] = ['y']*len(pos_mean) + ['n']*len(neg_mean)
+
+
+# motif_df.to_csv("./data/validation_data/output/plots/epitope_motif_saliency.csv", index=False)
+# sequence_df.to_csv("./data/validation_data/output/plots/epitope_sequence_saliency.csv", index=False)
