@@ -3,8 +3,7 @@
 /data/processed/
 /data/merged/
 /data/training_sets/
-/data/training_sets.zip
-**/data/model_weights/ML_weights/*
-**/data/model_weights/DL_weights/*
+/data/model_weights/ML_weights/**
+/data/model_weights/DL_weights/**
 /data/raw/
 /figures/**
