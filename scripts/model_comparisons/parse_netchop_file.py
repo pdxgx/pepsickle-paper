@@ -1,10 +1,21 @@
+#!usr/bin/env python3
+"""
+parse_netchop_file.py
+
+For issues contact Ben Weeder (weeder@ohsu.edu)
+
+this script processes the output of NetChop and returns summary metrics for
+comparison with other cleavage tools.
+"""
+
 import pandas as pd
 from sklearn import metrics
 from optparse import OptionParser
 
 parser = OptionParser()
-parser.add_option("-i", "--in_file", dest="in_file",
+parser.add_option("-i", "--in-file", dest="in_file",
                   help="input file...")
+parser.add_option("-o", "--out")
 
 (options, args) = parser.parse_args()
 
@@ -68,3 +79,6 @@ specificity = tn/(tn+fp)
 print("Sensitivity: ", sensitivity)
 print("Specificity: ", specificity)
 print("AUC: ", epitope_auc)
+
+
+result_df.to_csv(options.out, index=False)

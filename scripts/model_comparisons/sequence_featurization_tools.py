@@ -110,8 +110,8 @@ def create_sequence_regex(epitope_sequence):
         return epitope_sequence
 
 
-def get_peptide_window(sequence, starting_position, ending_position, upstream=10, 
-                       downstream=10, c_terminal=True):
+def get_peptide_window(sequence, starting_position, ending_position, upstream=6,
+                       downstream=6, c_terminal=True):
     """
     returns the window of AA's around the C-term of an epitope, given defined
     upstream and downstream window sizes and a row from a pandas df with
@@ -161,3 +161,24 @@ def get_peptide_window(sequence, starting_position, ending_position, upstream=10
                                         len(sequence)) * "*"
     # return up/down stream windows + cleavage site
     return upstream_seq + sequence[cleave_index] + downstream_seq
+
+
+def create_windows_from_protein(protein_seq, **kwargs):
+    """
+    wrapper for get_peptide_window(). takes in a protein sequence and returns
+    a vector of k-merized windows.
+    :param protein_seq: protein sequence
+    :return: vector of protein windows
+    """
+    # NOTE: last AA not made into window since c-terminal would be cleavage pos
+    protein_windows = []
+    for pos in range(len(protein_seq)-1):
+        start_pos = pos + 1
+        end_pos = pos + 2
+        tmp_window = get_peptide_window(protein_seq,
+                                        starting_position=start_pos,
+                                        ending_position=end_pos,
+                                        **kwargs)
+        protein_windows.append(tmp_window)
+
+    return protein_windows
