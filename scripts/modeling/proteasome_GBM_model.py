@@ -1,4 +1,12 @@
 #!/usr/bin/env python
+"""
+proteasome_GBM_model.py
+
+For issues contact Ben Weeder (weeder@ohsu.edu)
+
+This script trains a gradient boosted model on the specified input features and
+exports the best performing model (test AUC) as a model.joblib file
+"""
 
 from __future__ import print_function
 from datetime import datetime
@@ -131,6 +139,7 @@ _features = {
 		 ]
 }
 
+
 def time_print(string):
 	""" Prints string with date/time
 
@@ -139,6 +148,7 @@ def time_print(string):
 		No return value.
 	"""
 	print(datetime.now(), string)
+
 
 def split_range(string, descriptor):
 	""" Splits range string into list of values

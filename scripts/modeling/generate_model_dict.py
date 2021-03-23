@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """
-prep_epitope_validation_data.py
+generate_model_dict.py
 
 For issues contact Ben Weeder (weeder@ohsu.edu)
 
-This script extracts MHC class I epitope examples from [DOI] and maps them to
-their source sequences. results are exported to a CSV and used downstream for
-model validation_prep
+This script generates a keyed dictionary of deep learning models from .pickle
+model weights in the given directory. Full list can be imported into `pepsickle`
+and provided as model options.
 """
 
 from optparse import OptionParser
