@@ -6,7 +6,7 @@ For issues contact Ben Weeder (weeder@ohsu.edu)
 
 This script extracts MHC class I epitope examples from
 [https://doi.org/10.1038/ncomms13404] and maps them to their source sequences.
-results are exported to a CSV and used downstream for model validation_prep
+results are exported to a CSV and used downstream for model validation
 """
 
 import pandas as pd
@@ -84,6 +84,7 @@ new_cols = ['index', 'start_pos',  'end_pos', 'fragment', 'full_seq_accession',
             'full_sequence']
 unambiguous_dat.columns = new_cols
 unambiguous_dat['entry_source'] = "validation_prep"
+unambiguous_dat['Subunit'] = None
 
 # export
 unambiguous_dat.to_csv(options.out + "/validation_epitopes_w_source.csv",

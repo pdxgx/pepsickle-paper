@@ -1,4 +1,12 @@
 #!usr/bin/env python3
+"""
+filter_val_data.py
+
+For issues contact Ben Weeder (weeder@ohsu.edu)
+
+This script loads training and validation data to filter out examples preiously
+seen during training and testing
+"""
 
 import os
 import math
@@ -19,6 +27,9 @@ parser.add_option("--internal-filter-size", default=None,
                   help="verifies center window of size N is unique for all "
                        "entries. If no value is specified, returns unique full"
                        "sized windows.")
+parser.add_option("--human-only", dest="human_only", action="store_true",
+                  default=False,
+                  help="restricts to only human epitope exmaples in training data")
 
 (options, args) = parser.parse_args()
 
@@ -37,25 +48,24 @@ if "epitope_val_windows_" + str(options.window_size) + "aa_paired.pickle" in in_
 
 
 training_files = os.listdir(options.training_data_dir)
-if "all_mammal_20S_windows_" + str(options.window_size) + "aa.pickle" in training_files:
+if options.human_only:
+    digestion_training_dict = pickle.load(
+        open(options.training_data_dir +
+             "/human_20S_windows_" + str(options.window_size) +
+             "aa.pickle", "rb"))
+    epitope_training_dict = pickle.load(
+        open(options.training_data_dir +
+             "/human_epitope_windows_" + str(options.window_size) +
+             "aa.pickle", "rb"))
+
+else:
+    epitope_training_dict = pickle.load(
+        open(options.training_data_dir +
+             "/all_mammal_epitope_windows_" + str(options.window_size) +
+             "aa.pickle", "rb"))
     digestion_training_dict = pickle.load(
         open(options.training_data_dir +
              "/all_mammal_20S_windows_" + str(options.window_size) + "aa.pickle", "rb"))
-elif "human_20S_windows_" + str(options.window_size) + "aa.pickle" in training_files:
-    digestion_training_dict = pickle.load(
-        open(options.training_data_dir +
-             "/human_20S_windows_" + str(options.window_size) + "aa.pickle", "rb"))
-
-
-if "all_mammal_epitope_windows_" + str(options.window_size) + "aa.pickle" in training_files:
-    epitope_training_dict = pickle.load(
-        open(options.training_data_dir +
-             "/all_mammal_epitope_windows_" + str(options.window_size) + "aa.pickle", "rb"))
-
-elif "human_epitope_windows_" + str(options.window_size) + "aa.pickle" in training_files:
-    epitope_training_dict = pickle.load(
-        open(options.training_data_dir +
-             "/human_epitope_windows_" + str(options.window_size) + "aa.pickle", "rb"))
 
 
 epitope_positive_windows = dict()
