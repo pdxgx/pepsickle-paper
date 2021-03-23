@@ -53,67 +53,50 @@ python3 ./scripts/merging_and_filtering/negative_set_generation.py --full-negati
 ## for epitopes
 python3 ./scripts/merging_and_filtering/negative_set_generation.py --full-negative-set -w 8,8 -i ./data/merged/merged_data_all_mammal_verified.csv -o ./data/training_sets/all_mammal_windows_17aa.pickle
 
-## for human only
-## for 20S
-# python3 ./scripts/merging_and_filtering/negative_set_generation.py --full-negative-set -w 3,3 -i ./data/merged/merged_data_human_only_verified.csv -o ./data/training_sets/human_windows_7aa.pickle
-## for epitopes
-# python3 ./scripts/merging_and_filtering/negative_set_generation.py --full-negative-set -w 8,8 -i ./data/merged/merged_data_human_only_verified.csv -o ./data/training_sets/human_windows_17aa.pickle
-
 #### run model training
+## NOTE: uncommented script was used to train the most performant model
 ## 20S digestion models
 # NN model
-# python3 ./scripts/modeling/digestion_map_based_ensemble_net.py -w 7 -i ./data/training_sets/all_mammal_windows_7aa.pickle -o ./data/model_weights/
-# RF model
+# python3 ./scripts/modeling/digestion_map_based_ensemble_net.py -w 7 -i ./data/training_sets/all_mammal_windows_7aa.pickle -o ./data/model_weights/window_7aa
+# ML model
 ## NOTE: when using chemical features, values are normalized
 python3 ./scripts/modeling/proteasome_GBM_model.py -m proteasome -f chemistry -n -i ./data/training_sets/all_mammal_windows_7aa.pickle -o ./data/model_weights/ML_weights/in-vitro_7aa/chem
 # python3 ./scripts/modeling/proteasome_GBM_model.py -m proteasome -f identity -i ./data/training_sets/all_mammal_windows_7aa.pickle -o ./data/model_weights/ML_weights/in-vitro_7aa/identity
 
-## 20S if using human only
-# NN model
-# python3 ./scripts/modeling/digestion_map_based_ensemble_net.py -w 7 -i ./data/training_sets/human_windows_7aa.pickle -o ./data/model_weights/
-# RF model
-## NOTE: when using chemical features, values are normalized
-# python3 ./scripts/modeling/proteasome_GBM_model.py -m proteasome -f chemistry -n -i ./data/training_sets/human_windows_7aa.pickle -o ./data/model_weights/ML_weights/in-vitro_7aa/chem
-# python3 ./scripts/modeling/proteasome_GBM_model.py -m proteasome -f identity -i ./data/training_sets/human_windows_7aa.pickle -o ./data/model_weights/ML_weights/in-vitro_7aa/identity
-
 ## epitope models
-python3 ./scripts/modeling/epitope_based_ensemble_net.py -w 17 -i ./data/training_sets/all_mammal_windows_17aa.pickle -o ./data/model_weights/DL_weights
-# RF model
+python3 ./scripts/modeling/epitope_based_ensemble_net.py -w 17 -i ./data/training_sets/all_mammal_windows_17aa.pickle -o ./data/model_weights/DL_weights/window_17aa
+# ML model
 # python3 ./scripts/modeling/proteasome_GBM_model.py -m epitope -f chemistry -n -i ./data/training_sets/all_mammal_windows_17aa.pickle -o ./data/model_weights/ML_weights/epitope_7aa/chemistry
 # python3 ./scripts/modeling/proteasome_GBM_model.py -m epitope -f identity  -i ./data/training_sets/all_mammal_windows_17aa.pickle -o ./data/model_weights/ML_weights/epitope_17aa/identity
 
+#### compile model weights into single file
+## NOTE: if you'd like to use models other than the primary models for end-point analyses, move all generated weights to the same folder before running this command
+python3 ./scripts/modeling/generate_model_dict.py -i ./data/model_weights/DL_weights/window_17aa -o ./data/model_weights/DL_weights/window_17aa
 
-# --- works to this point ---
-
-
-# epitope if using human only
-
-# python3 ./scripts/modeling/epitope_based_ensemble_net.py --human-only -w 17 -i ./data/training_sets/human_epitope_windows_17aa.pickle -o ./data/model_weights/weights_by_window_size/window_17aa
-
-# compile model weights into single file
-# python3 ./scripts/modeling/generate_model_dict.py -i ./data/model_weights/model_weights_for_pepsickle -o ./data/model_weights/model_weights_for_pepsickle
-
-#### assess models on validation_prep data
+#### Prepare validation set
 ## compile fragments for left out 20S digestion validation_prep data
-# python3 ./scripts/static_dataset_extractions/extract_digestion_data.py -i ./data/validation_data/digestion_data/raw/ -o ./data/validation_data/digestion_data/
-# python3 ./scripts/validation_prep/prep_20S_digestion_val_data.py -i ./data/validation_data/digestion_data/compiled_digestion_df.csv -o ./data/validation_data/digestion_data/
-# python3 ./scripts/merging_and_filtering/epitope_index_check.py -i ./data/validation_data/digestion_data/20S_digestion_val_columns_remapped.csv -o ./data/validation_data/digestion_data/20S_digestion_val_data_indices_verified.csv
+python3 ./scripts/static_dataset_extractions/extract_digestion_data.py -i ./data/validation_data/digestion_data/raw/ -o ./data/validation_data/digestion_data/
+python3 ./scripts/validation_prep/prep_20S_digestion_val_data.py -i ./data/validation_data/digestion_data/compiled_digestion_df.csv -o ./data/validation_data/digestion_data/
+## NOTE: --full-negative not used to give balance initial set
+python3 ./scripts/merging_and_filtering/epitope_index_check.py -i ./data/validation_data/digestion_data/20S_digestion_val_columns_remapped.csv -o ./data/validation_data/digestion_data/20S_digestion_val_data_indices_verified.csv
 
 ## compile epitope validation_prep data
-#
-# python3 ./scripts/merging_and_filtering/epitope_index_check.py -i ./data/validation_data/epitope_data/validation_epitopes_w_source.csv -o ./data/validation_data/epitope_data/validation_epitopes_verified.csv
+python3 ./scripts/validation_prep/prep_epitope_validation_data.py -i ./data/validation_data/epitope_data/41467_2016_BFncomms13404_MOESM1318_ESM.csv -o ./data/validation_data/epitope_data
+python3 ./scripts/merging_and_filtering/epitope_index_check.py -i ./data/validation_data/epitope_data/validation_epitopes_w_source.csv -o ./data/validation_data/epitope_data/validation_epitopes_verified.csv
 
-## convert entries to cleavage windows
-# python3 ./scripts/merging_and_filtering/negative_set_generation.py -w 9,9 -i ./data/validation_data/digestion_data/20S_digestion_val_data_indices_verified.csv -o ./data/validation_data/validation_sets_pre-filter/20S_val_windows_21aa_paired.pickle
-# python3 ./scripts/merging_and_filtering/negative_set_generation.py -w 9,9 -i ./data/validation_data/epitope_data/validation_epitopes_verified.csv -o ./data/validation_data/validation_sets_pre-filter/epitope_val_windows_21aa_paired.pickle
+#### convert entries to cleavage windows
+## NOTE: largest window size is selected w/ downsampling for unique internal windows downstream
+python3 ./scripts/merging_and_filtering/negative_set_generation.py -w 9,9 -i ./data/validation_data/digestion_data/20S_digestion_val_data_indices_verified.csv -o ./data/validation_data/validation_sets_pre-filter/20S_val_windows_21aa_paired.pickle
+python3 ./scripts/merging_and_filtering/negative_set_generation.py -w 9,9 -i ./data/validation_data/epitope_data/validation_epitopes_verified.csv -o ./data/validation_data/validation_sets_pre-filter/epitope_val_windows_21aa_paired.pickle
+
 
 ## filter out entries seen in training data
-# python3 ./scripts/validation_prep/filter_val_data.py -w 21 --internal-filter-size 7 -i ./data/validation_data/validation_sets_pre-filter -t ./data/training_sets -o ./data/validation_data/completed_validation_sets
+python3 ./scripts/validation_prep/filter_val_data.py -w 21 --internal-filter-size 7 -i ./data/validation_data/validation_sets_pre-filter -t ./data/training_sets -o ./data/validation_data/completed_validation_sets
 
-## run models on validation sets
-# python3 ./scripts/model_comparisons/validate_models.py -w 7 -i ./data/validation_data/completed_validation_sets/window_dictionaries -m ./data/model_weights/trained_model_dict.pickle
-# python3 ./data/tmp-26S/test_26S.py -i ./data/tmp-26S/ -m ./data/model_weights/trained_model_dict.pickle
+#### Install pepsickle to handle application of the models to validation data. The full instructions can be found at [URL]
+## NOTE: to use the weights directly here, simply replace the weight files (model.joblib and trained_model_dict.pickle) that come with pepsickle by default.
 
+#### Run predictions on validation data
 pepsickle -v -f ./data/validation_data/completed_validation_sets/window_fasta_files/epitope_val_data_21aa.fasta -o ./data/validation_data/validation_results/pepsickle/pepsickle_epitope_val_results.txt
 pepsickle -m in-vitro -p C -f ./data/validation_data/completed_validation_sets/window_fasta_files/20S_digestion_constitutive_validation_data_21aa.fasta -o ./data/validation_data/validation_results/pepsickle/pepsickle_constitutive_20S_val_results.txt
 pepsickle -m in-vitro -p I -f ./data/validation_data/completed_validation_sets/window_fasta_files/20S_digestion_immuno_validation_data_21aa.fasta -o ./data/validation_data/validation_results/pepsickle/pepsickle_immuno_20S_val_results.txt
@@ -124,12 +107,13 @@ python3 ./scripts/model_comparisons/process_pepsickle_results.py -i ./data/valid
 python3 ./scripts/model_comparisons/process_pepsickle_results.py -i ./data/validation_data/validation_results/pepsickle/pepsickle_immuno_20S_val_results.txt -o ./data/validation_data/validation_results/pepsickle/pepsickle_immuno_20S_val_summary.txt
 
 
-# after running PCPS on val fastas... summarize results
+#### Compare to other cleavage tools
+## after running PCPS on val fastas... summarize results
 python3 ./scripts/model_comparisons/process_pcps_results.py -i ./data/validation_data/validation_results/PCPS/PCPS_epitope_preds.csv -p 21 -o ./data/validation_data/validation_results/PCPS/PCPS_epitope_pred_summary.csv
 python3 ./scripts/model_comparisons/process_pcps_results.py -i ./data/validation_data/validation_results/PCPS/PCPS_20S_constit_preds.csv -p 21 -o ./data/validation_data/validation_results/PCPS/PCPS_20S_constit_pred_summary.csv
 python3 ./scripts/model_comparisons/process_pcps_results.py -i ./data/validation_data/validation_results/PCPS/PCPS_20S_immuno_preds.csv -p 21 -o ./data/validation_data/validation_results/PCPS/PCPS_20S_immuno_summary.csv
 
-# after running NetChop on val fastas... summarize
+## after running NetChop on val fastas... summarize
 python3 ./scripts/model_comparisons/parse_netchop_file.py -i ./data/validation_data/validation_results/netchop/netchop_epitope_21aa_val_cleavage_preds.txt -o ./data/validation_data/validation_results/netchop/parsed_netchop_epitope_val_21aa_cleavage_preds.txt
 python3 ./scripts/model_comparisons/parse_netchop_file.py -i ./data/validation_data/validation_results/netchop//netchop_20S_constitutive_digestion_val_21aa_cleavage_preds.txt -o ./data/validation_data/validation_results/netchop/parsed_netchop_20S_constitutive_digestion_val_21aa_cleavage_preds.txt
 python3 ./scripts/model_comparisons/parse_netchop_file.py -i ./data/validation_data/validation_results/netchop/netchop_20S_immuno_digestion_val_21aa_cleavage_preds.txt -o ./data/validation_data/validation_results/netchop/parsed_netchop_20S_immuno_digestion_val_21aa_cleavage_preds.txt
