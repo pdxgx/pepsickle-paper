@@ -1,4 +1,5 @@
 #!bin/bash
+
 #### SETUP
 ## set working directory to base dir of project
 cd /Users/weeder/PycharmProjects/pepsickle-paper
