@@ -5,5 +5,7 @@
 /data/training_sets/
 /data/model_weights/ML_weights/**
 /data/model_weights/DL_weights/**
-/data/raw/
 /figures/**
+/data/raw/database_pulls/iedb_public.sql
+/data/raw/human_proteome.fasta
+/data/raw/human_proteome.fasta.zip
