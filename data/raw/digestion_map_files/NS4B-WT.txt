@@ -1,0 +1,12 @@
+# Name = NS4B-WT
+# DOI = 10.1128/JVI.79.8.4870–4876.2005
+# Subunit = 20S
+# Proteasome = M
+# Organism = Human
+# UniProt = NA
+>
+SQHLPYIEQGMMLAEQFKQKALGLLQTASR
+>
+SQHLPYIEQ
+SQHLPYIEQG
+SQHLPYIEQGM

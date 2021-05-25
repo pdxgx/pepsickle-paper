@@ -1,0 +1,14 @@
+# Name = JAK1(D) (50–368) 
+# DOI = 10.1016/s0092-8674(00)80097-5
+# Subunit = 20S
+# Proteasome = M
+# Organism = Mouse
+# UniProt = NA
+>
+EWNNFSYFPDITHIVIKES
+>
+EWNNFSYFPDITHIVI
+EWNNFSYFPDITHI
+EWNNFSY
+EWNNF
+EWNN
