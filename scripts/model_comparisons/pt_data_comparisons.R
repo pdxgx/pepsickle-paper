@@ -1,4 +1,3 @@
-
 #!usr/bin/env R
 
 # pt_data_comparisons.R
@@ -9,7 +8,8 @@
 # and provides summary/statistical comparisons
 
 # set working directory
-setwd("~/PycharmProjects/pepsickle-paper/data/validation_data/pt_data/pepsickle_pt_summaries")
+# setwd("~/PycharmProjects/pepsickle-paper/data/validation_data/pt_data/pepsickle_pt_summaries")
+setwd("./pepsickle-paper/data/validation_data/pt_data/pepsickle_pt_summaries")
 
 # Load in required packages
 library(ggplot2)

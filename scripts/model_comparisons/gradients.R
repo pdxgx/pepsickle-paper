@@ -7,7 +7,9 @@
 # This script loads and plots gradients of trained features from a trained DL model
 
 # load required packages
-setwd("~/PycharmProjects/proteasome/netchop/results")
+# setwd("~/PycharmProjects/proteasome/netchop/results")
+setwd("./pepsickle-paper/data/validation_data/output/plots")
+
 library(ggplot2)
 library(reshape2)
 library(scales)

@@ -8,7 +8,9 @@
 # This script loads predictions from varying test window sizes and compares performance.
 
 # Load in required packages
-setwd("~/PycharmProjects/pepsickle-paper/data/validation_data/output/epitope_mod_window_preds")
+# setwd("~/PycharmProjects/pepsickle-paper/data/validation_data/output/epitope_mod_window_preds")
+setwd("./pepsickle-paper/data/validation_data/output/plots")
+
 library(pROC)
 library(data.table)
 

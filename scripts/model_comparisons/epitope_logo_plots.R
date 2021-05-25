@@ -16,7 +16,9 @@ library(gridExtra)
 library(cowplot)
 
 ## load in epitope sequence data
-setwd("~/PycharmProjects/pepsickle-paper/data/validation_data/output/plots")
+# setwd("~/PycharmProjects/pepsickle-paper/data/validation_data/output/plots")
+setwd("./pepsickle-paper/data/validation_data/output/plots")
+
 epitope_dat <- fread("epitope_sequence_training_windows17aa.csv", header = T)
 epitope_dat <- epitope_dat[,2:dim(epitope_dat)[2]]
 

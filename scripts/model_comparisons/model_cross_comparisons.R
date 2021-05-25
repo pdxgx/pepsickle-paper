@@ -7,7 +7,8 @@
 # performance on other data types
 
 # set directory where data is stored
-setwd("~/PycharmProjects/pepsickle-paper/data/validation_data/validation_results/pepsickle")
+# setwd("~/PycharmProjects/pepsickle-paper/data/validation_data/validation_results/pepsickle")
+setwd("./pepsickle-paper/data/validation_data/validation_results/pepsickle")
 
 # load necessary libraries
 library(data.table)

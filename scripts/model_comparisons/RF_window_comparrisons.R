@@ -7,7 +7,9 @@
 # This script loads windows of various sizes for predicted cleavage sites and compares test performances
 
 # Load in required packages
+# setwd("~/PycharmProjects/pepsickle-paper/data/validation_data/output/in-vitro_mod_window_preds")
 setwd("~/PycharmProjects/pepsickle-paper/data/validation_data/output/in-vitro_mod_window_preds")
+
 library(pROC)
 library(data.table)
 

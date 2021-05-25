@@ -6,7 +6,8 @@
 # 
 # 
 
-setwd("~/PycharmProjects/pepsickle-paper/data/validation_data/plots")
+# setwd("~/PycharmProjects/pepsickle-paper/data/validation_data/plots")
+setwd("./pepsickle-paper/data/validation_data/plots")
 
 library(data.table)
 library(ggplot2)

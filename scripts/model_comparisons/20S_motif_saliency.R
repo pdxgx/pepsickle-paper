@@ -16,7 +16,8 @@ library(gridExtra)
 
 # set working directory to location of saliency vals
 # (change wd to proper location)
-setwd("~/PycharmProjects/pepsickle-paper/data/validation_data/plots")
+# setwd("~/PycharmProjects/pepsickle-paper/data/validation_data//output/plots")
+setwd("./pepsickle-paper/data/validation_data/output/plots")
 
 # read in saliency values from motif model
 motif <- fread("20S_motif_saliency.csv", header = TRUE)
