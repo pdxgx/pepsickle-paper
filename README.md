@@ -56,7 +56,9 @@ at:
 
 5. Create output directories that are expected by the pipeline. The following directories are needed for proper pipeline output:
    ```
-   mkdir XXXX [may just add this to .sh script w/ conditional
+   while read d; do
+        echo "mkdir $d"
+   done < directory_list.txt
    ```
     
 6. run the following command to iterate through data retrieval and
