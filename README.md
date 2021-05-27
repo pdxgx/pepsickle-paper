@@ -21,7 +21,6 @@ at:
 
    ```
    pip install -r requirements.txt
-   pip install pepsickle
    ```
 
 3. Dowload requisite datasets too large for Repo upload:
@@ -43,10 +42,17 @@ at:
    wget https://www.uniprot.org/uniprot/?query=proteome:UP000005640%20reviewed:yes#
    ```
 
-4. Return to the main directory and edit the `MASTER.sh` script to include your mysql user name and
-   password using nano or a text editor of your choice.
+4. Return to the main directory and edit the `MASTER.sh` script to include your mysql user name and password using nano or a text editor of your choice.
 
    `nano MASTER.sh`
+   ```
+    #### SETUP
+    ## set working directory to base dir of project
+    cd /path/to/pepsickle-paper
+    ## set temp environmental vars for mysql use
+    export MYSQL_USER=[USER]
+    export MYSQL_PWD=[PASSWORD]
+   ```
 
 5. Create output directories that are expected by the pipeline. The following directories are needed for proper pipeline output:
    ```
