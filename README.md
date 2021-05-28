@@ -1,5 +1,5 @@
 # Pepsickle paper repository
-This repo contains the companion code for the manuscript: `Pepsickle rapidly and accurately predicts proteasomal cleavage sites for improved neoantigen identification which can be found [here](https://www.biorxiv.org/content/10.1101/2021.05.14.444244v1).
+This repo contains the companion code for the manuscript: "Pepsickle rapidly and accurately predicts proteasomal cleavage sites for improved neoantigen identification" which can be found [here](https://www.biorxiv.org/content/10.1101/2021.05.14.444244v1).
 
 
 ## Trained model availability and use:
