@@ -87,8 +87,5 @@ This project aggregates data from a variety of databases, including:
 - [AntiJen database](http://www.ddg-pharmfac.net/antijen/AntiJen/antijenhomepage.htm)
 - [SYFPEITHI database](http://www.syfpeithi.de/)
 
-Data from peer reviewed literature was also aggregated. More details on paper specific data can be found under:
-- `/docs/README - Digestion Sources.txt`
-- `/docs/README - Winter et al data.txt`
-- `/docs/README - Breast cancer epitope data.txt`
+Data from peer reviewed literature was also aggregated. More details on paper specific data can be found in the main text (Table X).
 
