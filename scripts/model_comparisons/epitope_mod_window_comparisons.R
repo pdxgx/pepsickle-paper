@@ -9,9 +9,10 @@
 
 # Load in required packages
 # setwd("~/PycharmProjects/pepsickle-paper/data/validation_data/output/epitope_mod_window_preds")
-setwd("./pepsickle-paper/data/validation_data/output/plots")
+setwd("~/PycharmProjects/pepsickle-paper/data/validation_data/output/epitope_mod_window_preds")
 
 library(pROC)
+library(ggplot2)
 library(data.table)
 
 # load DL predictions from each window size
@@ -59,6 +60,12 @@ ep_15_roc <- roc(ep_15$class~ep_15$pred)
 ep_17_roc <- roc(ep_17$class~ep_17$pred)
 ep_19_roc <- roc(ep_19$class~ep_19$pred)
 ep_21_roc <- roc(ep_21$class~ep_21$pred)
+
+auc_vals <- c(ep_7_roc$auc[1], ep_9_roc$auc[1], ep_11_roc$auc[1], ep_13_roc$auc[1], ep_15_roc$auc[1], ep_17_roc$auc[1], ep_19_roc$auc[1], ep_21_roc$auc[1])
+window_size <- seq(7,21,2)
+auc_df <- as.data.frame(cbind(window_size, auc_vals))
+auc_plot <- ggplot(auc_df, aes(x=window_size, y=auc_vals)) + geom_point() + geom_line() + ylim(.8,1) + scale_x_continuous(breaks=seq(7,21,2))
+auc_plot + xlab("Input Window Size (aa)") + ylab("Test Set Performance (AUC)") +theme_bw()+theme(text = element_text(size=16))
 
 rf_ep_17_roc <- roc(rf_ep_17$class~rf_ep_17$probabilty)
 

@@ -78,7 +78,7 @@ full_term_by_study
 out_plot <- plot_grid(full_term_bp, full_term_by_study, align = "h", rel_widths = c(1/3, 2/3), nrow=1, axis = "t")
 
 # save
-ggsave("~/PycharmProjects/pepsickle-paper/figures/main/pt_cleavage_predictions.png", out_plot, height = 5, width = 8, units = "in", device = "png")
+ggsave("~/PycharmProjects/pepsickle-paper/figures/main/pt_cleavage_predictions.pdf", out_plot, height = 5, width = 8, units = "in", device = "pdf", dpi=600)
 
 ## look at statistical associations
 # Compare for full dataset

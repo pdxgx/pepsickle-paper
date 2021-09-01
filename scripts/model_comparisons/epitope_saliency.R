@@ -8,7 +8,7 @@
 
 # set proper working directory
 # setwd("~/PycharmProjects/pepsickle-paper/data/validation_data/output/plots")
-setwd("./pepsickle-paper/data/validation_data/output/plots")
+setwd("~/PycharmProjects/pepsickle-paper/data/validation_data/output/plots")
 
 # load in required libraries
 library(ggplot2)
