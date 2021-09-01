@@ -153,4 +153,4 @@ python3 ./scripts/model_comparisons/pepsickle_pt_data_processing.py --in-vivo ./
 python3 ./scripts/model_comparisons/pepsickle_pt_data_processing.py --in-vivo ./data/validation_data/pt_data/ott_cleavage_preds.txt --in-vitro ./data/validation_data/pt_data/ott_cleavage_preds_iv.txt -o ./data/validation_data/pt_data/pepsickle_pt_summaries/ott_pt_summary.csv
 python3 ./scripts/model_comparisons/pepsickle_pt_data_processing.py --in-vivo ./data/validation_data/pt_data/mupexi_cleavage_preds.txt --in-vitro ./data/validation_data/pt_data/mupexi_cleavage_preds_iv.txt -o ./data/validation_data/pt_data/pepsickle_pt_summaries/mupexi_pt_summary.csv
 
-# all summary figures and code are not run in this script, but can be found in ./scrips/model_comparisons
+# all summary figures and R code are not run in this script, but can be found in ./scrips/model_comparisons
