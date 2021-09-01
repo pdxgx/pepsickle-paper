@@ -94,7 +94,7 @@ python3 ./scripts/merging_and_filtering/negative_set_generation.py -w 9,9 -i ./d
 ## filter out entries seen in training data
 python3 ./scripts/validation_prep/filter_val_data.py -w 21 --internal-filter-size 7 -i ./data/validation_data/validation_sets_pre-filter -t ./data/training_sets -o ./data/validation_data/completed_validation_sets
 
-#### Install pepsickle to handle application of the models to validation data. The full instructions can be found at [URL]
+#### Install pepsickle to handle application of the models to validation data. The full instructions can be found at https://github.com/pdxgx/pepsickle
 ## NOTE: to use the weights directly here, simply replace the weight files (model.joblib and trained_model_dict.pickle) that come with pepsickle by default.
 
 #### Run predictions on validation data
@@ -152,3 +152,5 @@ pepsickle -m in-vitro -p I -f ./data/validation_data/pt_data/mupexi_peptides_wit
 python3 ./scripts/model_comparisons/pepsickle_pt_data_processing.py --in-vivo ./data/validation_data/pt_data/tesla_cleavage_preds.txt --in-vitro ./data/validation_data/pt_data/tesla_cleavage_preds_iv.txt -o ./data/validation_data/pt_data/pepsickle_pt_summaries/tesla_pt_summary.csv
 python3 ./scripts/model_comparisons/pepsickle_pt_data_processing.py --in-vivo ./data/validation_data/pt_data/ott_cleavage_preds.txt --in-vitro ./data/validation_data/pt_data/ott_cleavage_preds_iv.txt -o ./data/validation_data/pt_data/pepsickle_pt_summaries/ott_pt_summary.csv
 python3 ./scripts/model_comparisons/pepsickle_pt_data_processing.py --in-vivo ./data/validation_data/pt_data/mupexi_cleavage_preds.txt --in-vitro ./data/validation_data/pt_data/mupexi_cleavage_preds_iv.txt -o ./data/validation_data/pt_data/pepsickle_pt_summaries/mupexi_pt_summary.csv
+
+# all summary figures and code are not run in this script, but can be found in ./scrips/model_comparisons
