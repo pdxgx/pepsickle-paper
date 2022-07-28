@@ -87,8 +87,8 @@ python3 ./scripts/merging_and_filtering/epitope_index_check.py -i ./data/validat
 
 #### convert entries to cleavage windows
 ## NOTE: largest window size is selected w/ downsampling for unique internal windows downstream
-python3 ./scripts/merging_and_filtering/negative_set_generation.py -w 9,9 -i ./data/validation_data/digestion_data/20S_digestion_val_data_indices_verified.csv -o ./data/validation_data/validation_sets_pre-filter/20S_val_windows_21aa_paired.pickle
-python3 ./scripts/merging_and_filtering/negative_set_generation.py -w 9,9 -i ./data/validation_data/epitope_data/validation_epitopes_verified.csv -o ./data/validation_data/validation_sets_pre-filter/epitope_val_windows_21aa_paired.pickle
+python3 ./scripts/merging_and_filtering/negative_set_generation.py -w 10,10 -i ./data/validation_data/digestion_data/20S_digestion_val_data_indices_verified.csv -o ./data/validation_data/validation_sets_pre-filter/20S_val_windows_21aa_paired.pickle
+python3 ./scripts/merging_and_filtering/negative_set_generation.py -w 10,10 -i ./data/validation_data/epitope_data/validation_epitopes_verified.csv -o ./data/validation_data/validation_sets_pre-filter/epitope_val_windows_21aa_paired.pickle
 
 
 ## filter out entries seen in training data
